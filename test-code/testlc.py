@@ -4,7 +4,26 @@ import numpy as np
 import numpy.fft as fft
 import matplotlib.pyplot as plt
 
+# Seperate into two classes Object and LightCurve
+# H, J and K magnitudes Derived properties.
+# grep to search text
+#for every object: txt with metadata and fits for data
+
 class LightCurve(object):
+    
+    def __init__(self,hdul):
+        
+        self.lc = hdul[1].data['PDCSAP_FLUX'] # Lightcurve
+        self.time = hdul[1].data['TIME'] # Time
+    
+    def plot(self):
+        fig, ax = plt.subplots()
+        ax.plot(self.time, self.lc)
+        ax.plot(self.time, self.clc)
+        ax.set_title('Object ID: ' + str(self.id) + '   Campaign: ' + str(self.campaign))
+        ax.grid()
+
+class Object(object):
     
     def __init__(self, file):
         self.file = file  #String of name of the file
@@ -20,10 +39,9 @@ class LightCurve(object):
             self.ra = hdul[0].header['RA_OBJ'] # RA
             self.dec = hdul[0].header['DEC_OBJ'] # Declination
             self.parallax = hdul[0].header['PARALLAX'] # Parallax
+            self.lc = 
             
             self.cadence = hdul[0].header['OBSMODE'] #Long/short cadence observation
-            self.lc = hdul[1].data['SAP_FLUX'] # Lightcurve
-            self.time = hdul[1].data['TIME'] # Time
             
             #Flag determines interest in data. 0 - Unprocessed.
             #0 - Unprocessed. 1 - Priority. 2 - Good. 3 -Trash
@@ -32,12 +50,6 @@ class LightCurve(object):
     def saveBinTable(self):
         with fits.open(self.file) as hdul:
             self.lctable = Table(hdul[1].data)
-    
-    def plotLC(self):
-        fig, ax = plt.subplots()
-        ax.plot(self.time, self.lc)
-        ax.set_title('Object ID: ' + str(self.id) + '   Campaign: ' + str(self.campaign))
-        ax.grid()
     
     def setFlag(self,integer):
         self.flag = integer
