@@ -15,13 +15,15 @@ class LightCurve(object):
         
         self.lc = hdul[1].data['PDCSAP_FLUX'] # Lightcurve
         self.time = hdul[1].data['TIME'] # Time
+        
+        self.lc = self.lc[~np.isnan(self.lc)]
+        self.ps = np.abs(fft.rfft(self.lc))**2
     
-    def plot(self):
-        fig, ax = plt.subplots()
-        ax.plot(self.time, self.lc)
-        ax.plot(self.time, self.clc)
-        ax.set_title('Object ID: ' + str(self.id) + '   Campaign: ' + str(self.campaign))
-        ax.grid()
+    def standarize(self):
+        mean = np.mean(self.lc)
+        self.lc = self.lc - mean
+    
+    
 
 class Object(object):
     
@@ -39,7 +41,7 @@ class Object(object):
             self.ra = hdul[0].header['RA_OBJ'] # RA
             self.dec = hdul[0].header['DEC_OBJ'] # Declination
             self.parallax = hdul[0].header['PARALLAX'] # Parallax
-            self.lc = 
+            self.data = LightCurve(hdul)
             
             self.cadence = hdul[0].header['OBSMODE'] #Long/short cadence observation
             
@@ -53,6 +55,13 @@ class Object(object):
     
     def setFlag(self,integer):
         self.flag = integer
+    
+    def plot(self):
+        fig, ax = plt.subplots()
+        ax.plot(self.data.lc)
+        #ax.plot(self.data.ps)
+        ax.set_title('Object ID: ' + str(self.id) + '   Campaign: ' + str(self.campaign))
+        ax.grid()
 
-test1 = LightCurve('testlc1.fits')
-test2 = LightCurve('testlc2.fits')
+test1 = Object('testlc1.fits')
+test2 = Object('testlc2.fits')
