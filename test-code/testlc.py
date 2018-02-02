@@ -10,13 +10,18 @@ class LightCurve(object):
         self.file = file  #String of name of the file
         
         with fits.open(self.file) as hdul:
-            #self.hdul = fits.open(self.file)
             self.id = hdul[0].header['KEPLERID'] #  Kepler ID
             self.epic = hdul[0].header['OBJECT'] # EPIC ID
             self.campaign = hdul[0].header['CAMPAIGN'] # Campaign Number
+            self.ccdModule = hdul[0].header['MODULE']
+            #self.ccdChannel = hdul[0].header['CHANNEL']
+            #self.ccdOutput = hdul[0],header['OUTPUT'] #Do we need these two?
+            
             self.ra = hdul[0].header['RA_OBJ'] # RA
             self.dec = hdul[0].header['DEC_OBJ'] # Declination
             self.parallax = hdul[0].header['PARALLAX'] # Parallax
+            
+            self.cadence = hdul[0].header['OBSMODE'] #Long/short cadence observation
             self.lc = hdul[1].data['SAP_FLUX'] # Lightcurve
             self.time = hdul[1].data['TIME'] # Time
             
@@ -38,3 +43,4 @@ class LightCurve(object):
         self.flag = integer
 
 test1 = LightCurve('testlc1.fits')
+test2 = LightCurve('testlc2.fits')
