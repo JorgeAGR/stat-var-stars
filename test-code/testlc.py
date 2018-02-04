@@ -23,7 +23,8 @@ class LightCurve(object):
     
     def standarize(self):
         mean = np.mean(self.lc)
-        self.lc = self.lc - mean
+        std = clnp.std(self.lc)
+        self.lc = (self.lc - mean)/std
     
     
 
