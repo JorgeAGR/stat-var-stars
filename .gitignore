@@ -1,4 +1,3 @@
 #Specificies git to ignore .fits files
 *.fits
-/code/jackiewicz-code
-
+*.txt

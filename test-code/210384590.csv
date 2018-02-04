@@ -1,0 +1,10 @@
+file|testlc2.fits
+id|210384590
+epic|210384590
+campaign|4
+ccdModule|16
+ra|59.64924
+dec|13.105031
+parallax|<astropy.io.fits.card.Undefined object at 0x7efe3ffb1860>
+cadence|long cadence
+flag|0
