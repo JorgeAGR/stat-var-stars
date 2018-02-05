@@ -19,7 +19,7 @@ class LightCurve(object):
         self.time = hdul[1].data['TIME'] # Time
         
         self.lc = self.lc[~np.isnan(self.lc)]
-        self.ps = np.abs(fft.rfft(self.lc))**2
+        self.ps = np.abs(fft.fft(self.lc))**2
     
     def standarize(self):
         mean = np.mean(self.lc)
