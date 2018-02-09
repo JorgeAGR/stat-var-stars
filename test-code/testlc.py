@@ -11,6 +11,8 @@ import csv
 # H, J and K magnitudes Derived properties.
 #for every object: txt with metadata and fits for data
 
+#
+
 class LightCurve(object):
     
     def __init__(self,hdul):
@@ -19,12 +21,15 @@ class LightCurve(object):
         self.time = hdul[1].data['TIME'] # Time
         
         self.lc = self.lc[~np.isnan(self.lc)]
-        self.ps = np.abs(fft.fft(self.lc))**2
     
     def standarize(self):
         mean = np.mean(self.lc)
-        std = clnp.std(self.lc)
-        self.lc = (self.lc - mean)/std
+        #std = clnp.std(self.lc)
+        self.lc = (self.lc - mean)#/std
+    
+    def powerSpectrum(self):
+        self.ps = np.abs(fft.rfft(self.lc))**2
+        self.ps = fft.fftshift(self.ps)
     
     
 
@@ -65,6 +70,16 @@ class Object(object):
         ax.plot(self.data.lc)
         #ax.plot(self.data.ps)
         ax.set_title('Object ID: ' + str(self.id) + '   Campaign: ' + str(self.campaign))
+        ax.grid()
+    
+    def plotPS(self):
+        fig, ax = plt.subplots()
+        ax.plot(self.data.ps)
+        #ax.plot(self.data.ps)
+        ax.set_title('Object ID: ' + str(self.id) + '   Campaign: ' + str(self.campaign))
+        #ax.set_xlim(0,300)
+        ax.set_yscale('log')
+        #ax.set_ylim(0,10**8)
         ax.grid()
     
     def searchEpic(self):
@@ -120,3 +135,9 @@ class Object(object):
 
 test1 = Object('testlc1.fits')
 test2 = Object('testlc2.fits')
+
+test1.data.standarize()
+#test2.data.standarize()
+
+test1.data.powerSpectrum()
+#test2.data.powerSpectrum()
