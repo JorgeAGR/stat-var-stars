@@ -20,6 +20,7 @@ class LightCurve(object):
         self.lc = hdul[1].data['PDCSAP_FLUX'] # Lightcurve
         self.time = hdul[1].data['TIME'] # Time
         
+        self.time = self.time[~np.isnan(self.lc)]
         self.lc = self.lc[~np.isnan(self.lc)]
     
     def standarize(self):
@@ -28,7 +29,7 @@ class LightCurve(object):
         self.lc = (self.lc - mean)#/std
     
     def powerSpectrum(self):
-        self.ps = np.abs(fft.rfft(self.lc))**2
+        self.ps = np.abs((fft.fft(self.lc))**2)
         self.ps = fft.fftshift(self.ps)
     
     
