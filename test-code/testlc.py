@@ -25,11 +25,13 @@ class LightCurve(object):
     
     def standarize(self):
         mean = np.mean(self.lc)
-        #std = clnp.std(self.lc)
+        #std = np.std(self.lc)
         self.lc = (self.lc - mean)#/std
     
     def powerSpectrum(self):
-        self.ps = np.abs((fft.fft(self.lc))**2)
+        self.freq = fft.fftfreq(len(self.time), d = 1)
+        self.freq = fft.fftshift(self.freq)
+        self.ps = np.abs((fft.fft(self.lc)))**2
         self.ps = fft.fftshift(self.ps)
     
     
@@ -75,11 +77,11 @@ class Object(object):
     
     def plotPS(self):
         fig, ax = plt.subplots()
-        ax.plot(self.data.ps)
+        ax.plot(self.data.freq, self.data.ps)
         #ax.plot(self.data.ps)
         ax.set_title('Object ID: ' + str(self.id) + '   Campaign: ' + str(self.campaign))
-        #ax.set_xlim(0,300)
-        ax.set_yscale('log')
+        ax.set_xlim(0,max(self.data.freq))
+        #ax.set_yscale('log')
         #ax.set_ylim(0,10**8)
         ax.grid()
     
@@ -136,9 +138,12 @@ class Object(object):
 
 test1 = Object('testlc1.fits')
 test2 = Object('testlc2.fits')
+test3 = Object('testlc3.fits')
 
-test1.data.standarize()
+test3.data.standarize()
 #test2.data.standarize()
 
-test1.data.powerSpectrum()
+test3.data.powerSpectrum()
 #test2.data.powerSpectrum()
+
+test3.plotPS()
