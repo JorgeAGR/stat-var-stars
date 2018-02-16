@@ -13,12 +13,34 @@ class CampaignManager(object):
     def __init__(self):
         
         print('Developed by: Jorge A. Garcia @ New Mexico State University')
-        self.process()
         
+        self.main()
+    
+    def main(self):
+        
+        main = '=Menu=\n1) Process\n2) Exit\nSelect an option: '
+        
+        option = input(main)
+        
+        if option in ('1', 'process', 'Process'):
+            self.process()
+        else:
+            print('Bye!')
+    
     def process(self):
-        campaign = input('Enter campaign to process: ')
+        while True:
+            try:
+                campaign = input('Enter campaign to process: ')
+                int(campaign)
+                break
+            except:
+                if campaign in ('q','Q','quit','QUIT','Quit'):
+                    print('Bye!')
+                    return
+                else:
+                    pass
         
-        directory = 'k2c' + str(campaign) + '/k2fits/'
+        directory = 'k2c' + campaign + '/k2fits/'
         filelist = os.listdir(directory)
         del filelist[-1]
         
