@@ -46,12 +46,12 @@ class CampaignManager(object):
         
         for f in filelist:
             ObjectID(directory+f)
-        
+        print('Done!')
         repeat = input('Do another campaign?: ')
         if repeat in ('y','Y','yes','Yes','YES'):
             self.process(self)
         else:
-            print('Done!')
+            self.main()
         
 
 class ObjectID(object):
@@ -67,6 +67,10 @@ class ObjectID(object):
             
             self.LC = hdul[1].data['PDCSAP_FLUX'] # Lightcurve
             self.TIME = hdul[1].data['TIMECORR'] # Time
+            
+            # Flag determines interest in data. 0 - Unprocessed.
+            # 0 - Unprocessed. 1 - Priority. 2 - Good. 3 -Trash
+            self.FLAG = 0
             
             self.MODULE = hdul[0].header['MODULE'] # CCD Module Number
             self.CHANNEL = hdul[0].header['CHANNEL'] # CCD Channel Number
@@ -135,7 +139,7 @@ class ObjectID(object):
         with open(directory + str(self.EPIC) + '.csv', 'w') as file:
             write = csv.writer(file, delimiter='|', quoting = csv.QUOTE_MINIMAL)
             for i in range(len(atts)):
-                if i != 8:
+                if i not in (4, 5):
                     write.writerow([atts[i][0], atts[i][1]])
         
         del atts
@@ -144,10 +148,16 @@ class ObjectID(object):
         directory = 'k2c' + str(self.CAMPAIGN) + '/data/' # Sets string for directory according to campaign
         atts = tuple(self.__dict__.items()) # Creates a tuple of tuples, containing (Keyword, Value) of attributes
         
+        comments = []
+        with open('etc/fits-comments.txt', 'r') as txt:
+            read = csv.reader(txt)
+            for line in read:
+                comments.append(line)
+        
         head = fits.Header() # Defines Header for PrimaryHDU
         for i in range(1,len(atts)): # Iteration to create and assign Cards of attributes for Header (Except LC and Time)
             if i not in (4,5):
-                c = fits.Card(atts[i][0], atts[i][1])
+                c = fits.Card(atts[i][0], atts[i][1], comments[i])
                 head.append(c)
         phdu = fits.PrimaryHDU(header = head) # Creates PrimaryHDU from defined Header. == Metadata Here ==
         
