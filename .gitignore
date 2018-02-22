@@ -1,4 +1,5 @@
 #Specificies git to ignore .fits files
-/k2*/*.fits
-/k2*/*.txt
-/k2*/*.csv
+/k2*/*/*.fits
+/k2*/*/*.txt
+/k2*/*/*.csv
+/epic-catalog/
