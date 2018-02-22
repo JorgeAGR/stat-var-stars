@@ -1,0 +1,77 @@
+id|
+hip|
+tyc|
+ucac|
+twomass|
+sdss|
+objtype|
+kepflag|
+stpropflag|
+k2_ra|
+k2_dec|
+pmRA|
+e_pmRA|
+pmDEC|
+e_pmDEC|
+plx|
+e_plx|
+bmag|
+e_bmag|
+vmag|
+e_vmag|
+umag|
+e_umag|
+gmag|
+e_gmag|
+rmag|
+e_rmag|
+imag|
+e_imag|
+zmag|
+e_zmag|
+jmag| 32
+e_jmag| 33
+hmag| 34
+e_hmag| 35
+kmag| 36
+e_kmag| 37
+w1mag|
+e_w1mag|
+w2mag|
+e_w2mag|
+w3mag|
+e_w3mag|
+w4mag|
+e_w4mag|
+kp| 46
+teff| 47
+ep_teff| 
+em_teff| 
+logg| 50
+ep_logg|
+em_logg|
+feh| 53
+ep_feh|
+em_feh|
+rad| 56
+ep_rad|
+em_rad|
+mass| 59
+ep_mass|
+em_mass|
+rho| 62
+ep_rho|
+em_rho|
+lum| 65
+ep_lum|
+em_lum|
+d| 68
+ep_d|
+em_d|
+ebv| 71
+ep_ebv|
+em_ebv|
+nomad|
+mflg|
+prox|
+k2_avail_flag
