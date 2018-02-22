@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from astroML.time_series import lomb_scargle, lomb_scargle_bootstrap
 
-hdul = fits.open('k2c4/k2fits/ktwo210517342-c04_llc.fits')
+'''hdul = fits.open('k2c4/k2fits/ktwo210517342-c04_llc.fits')
 lc = hdul[1].data['PDCSAP_FLUX'] # Lightcurve
 dlc = hdul[1].data['PDCSAP_FLUX_ERR'] # Lightcurve Error
 time = hdul[1].data['TIME'] # Time
@@ -31,6 +31,8 @@ fgrid = frequency_grid(time)
 P_LS = lomb_scargle(time, lc, dlc, fgrid)
 
 A_LS = np.sqrt(4*P_LS / len(lc)) * 10 ** 6
+'''
+test1 = fits.open('k2c4/data/210359769.fits')
 
 fig, ax = plt.subplots()
 ax.plot(fgrid, A_LS)
