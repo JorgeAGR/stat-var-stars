@@ -194,11 +194,16 @@ class ObjectID(object):
         colelc = fits.Column(name = 'E_LC', format = 'E', unit = 'ppm', array = self.E_LC) # LC Column
         colfreq = fits.Column(name = 'FREQS', format = 'E', unit = '1/d', array = self.FREQS) # LC Column
         colps = fits.Column(name = 'AMP_LOMBSCARG', format = 'E', unit = 'ppm', array = self.A_LS) # PS Column
-        coldefs = fits.ColDefs([colt, collc, colelc, colfreq, colps]) # "Zips" the columns together
-        binthdu = fits.BinTableHDU.from_columns(coldefs) # Creates a BinTableHDU from the zipped columns
-        binthdu.name = 'DATA'
         
-        hdul = fits.HDUList([phdu, binthdu]) # Creates an HDUList from the PrimaryHDU and BinTableHDU
+        coldefsdata = fits.ColDefs([colt, collc, colelc]) # "Zips" the columns together
+        binthdudata = fits.BinTableHDU.from_columns(coldefsdata) # Creates a BinTableHDU from the zipped columns
+        binthdudata.name = 'DATA'
+        
+        coldefsamp = fits.ColDefs([colfreq, colps])
+        binthduamp = fits.BinTableHDU.from_columns(coldefsamp)
+        binthduamp.name = 'SPECTRUM'
+        
+        hdul = fits.HDUList([phdu, binthdudata, binthduamp]) # Creates an HDUList from the PrimaryHDU and BinTableHDU
         hdul.writeto(directory + str(self.EPIC) + '.fits') # Writes to assigned directory with object's EPIC ID
 
 #test1 = ObjectID('k2c4/k2fits/testlc1.fits')
