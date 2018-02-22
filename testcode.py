@@ -160,8 +160,9 @@ class Object(object):
 
 
 test1 = Object('k2c4/k2fits/ktwo210359769-c04_llc.fits')
-test2 = Object('k2c4/k2fits/ktwo210384590-c04_llc.fits')
-test3 = Object('k2c4/k2fits/ktwo210517342-c04_llc.fits')
+test2 = fits.open('k2c4/data/210359769.fits')
+#test2 = Object('k2c4/k2fits/ktwo210384590-c04_llc.fits')
+#test3 = Object('k2c4/k2fits/ktwo210517342-c04_llc.fits')
 
 #test3.data.standarize()
 #test2.data.standarize()
@@ -169,4 +170,4 @@ test3 = Object('k2c4/k2fits/ktwo210517342-c04_llc.fits')
 #test3.data.powerSpectrum()
 #test2.data.powerSpectrum()
 
-test3.plotAS()
+#test3.plotAS()
