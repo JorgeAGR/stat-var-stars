@@ -1,0 +1,38 @@
+Kepler ID
+EPIC ID
+Campaign Number
+Lightcurve (e-/s)
+Time (d)
+Flag (Label for the data)
+CCD Module Number
+CCD Channel Number
+Right Ascension (Deg)
+Declination (Deg)
+Parallax
+Cadence (Long/Short)
+J Magnitude (mag)
+J Magnitude Error (mag)
+H Magnitude (mag)
+H Magnitude Error (mag)
+K Magnitude (mag)
+K Magnitude Error (mag)
+Kepler Magnitude (mag)
+Effective Temperature (K)
+Effective Temperature Error (K)
+log Surface Gravity (cgs)
+log Surface Gravity Error (cgs)
+Metallicity (dex)
+Metallicity Error (dex)
+Stellar Radius (Solar Units)
+Stellar Radius Error (Solar Units)
+Stellar Mass (Solar Units)
+Stellar Mass Error (Solar Units)
+Stellar Density (Solar Units)
+Stellar Density Error (Solar Units)
+Stellar Luminosity (Solar Units)
+Stellar Luminosity Error (Solar Units)
+Distance (pc)
+Distance Error (pc)
+Extinction (mag)
+Extinction Error (mag)
+
