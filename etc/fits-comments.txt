@@ -1,8 +1,11 @@
 Kepler ID
 EPIC ID
 Campaign Number
-Lightcurve (e-/s)
+Lightcurve (ppm)
+Lightcurve Error (ppm)
 Time (d)
+Frequency Grid (1/d)
+Lomb-Scargle Ampltude (ppm)
 Flag (Label for the data)
 CCD Module Number
 CCD Channel Number
