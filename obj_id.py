@@ -5,6 +5,7 @@ and lightcurves. Searches for more meta data
 and writes a new FITS file with everything
 '''
 from astropy.io import fits
+from astroML.time_series import lomb_scargle
 import csv
 import os
 
@@ -42,7 +43,6 @@ class CampaignManager(object):
         
         directory = 'k2c' + campaign + '/k2fits/'
         filelist = os.listdir(directory)
-        del filelist[-1]
         
         for f in filelist:
             ObjectID(directory+f)
@@ -65,8 +65,11 @@ class ObjectID(object):
                 # Removes the 'EPIC' prefix from the ID.
             self.CAMPAIGN = hdul[0].header['CAMPAIGN'] # Campaign Number
             
-            self.LC = hdul[1].data['PDCSAP_FLUX'] # Lightcurve
-            self.TIME = hdul[1].data['TIMECORR'] # Time
+            self.LC = hdul[1].data['PDCSAP_FLUX'] # Lightcurve w/ NaNs
+            self.E_LC = hdul[1].data['PDCSAP_FLUX_ERR'] # Lightcurve Error w/ NaNs
+            self.TIME = hdul[1].data['TIME'] # Time w/ NaNs
+            
+            self.processData()
             
             # Flag determines interest in data. 0 - Unprocessed.
             # 0 - Unprocessed. 1 - Priority. 2 - Good. 3 -Trash
@@ -88,20 +91,19 @@ class ObjectID(object):
     
     def searchEpic(self):
         if 210000000 >= self.EPIC >= 201000001:
-            filename = 'epic-catalog/epic_1_19Dec2017.txt'
-            print('uh oh')
+            filename = 'epic_1_19Dec2017.txt'
         elif 220000000 >= self.EPIC >= 210000001:
-            filename = 'epic-catalog/epic_2_19Dec2017.txt'
+            filename = 'epic_2_19Dec2017.txt'
         elif 230000000 >= self.EPIC >= 220000001:
-            filename = 'epic-catalog/epic_3_19Dec2017.txt'
+            filename = 'epic_3_19Dec2017.txt'
         elif 240000000 >= self.EPIC >= 230000001:
-            filename = 'epic-catalog/epic_4_19Dec2017.txt'
+            filename = 'epic_4_19Dec2017.txt'
         elif 250000000 >= self.EPIC >= 240000001:
-            filename = 'epic-catalog/epic_5_19Dec2017.txt'
+            filename = 'epic_5_19Dec2017.txt'
         elif 251809654 >= self.EPIC >= 250000001:
-            filename = 'epic-catalog/epic_6_19Dec2017.txt'
+            filename = 'epic_6_19Dec2017.txt'
         
-        with open(filename) as file:
+        with open('epic-catalog/' + filename) as file:
             for line in file:
                 if str(self.EPIC) in line:
                     fields = line.split('|')
@@ -132,6 +134,30 @@ class ObjectID(object):
                     self.E_EBV = fields[71]
                     break
     
+    def processData(self):
+        def frequency_grid(time):
+            freq_min = 2*np.pi / (time[-1] - time[0])
+            freq_max = np.pi / np.median(time[1:] - time[:-1])
+            n_bins = int(np.round(5 * (freq_max - freq_min)/freq_min))
+            return np.linspace(freq_min, freq_max, n_bins)
+        
+        with fits.open(self.file) as hdul:
+            bjdrefi = hdul[1].header['BJDREFI']
+            bjdreff = hdul[1].header['BJDREFF']
+        
+        self.TIME = self.TIME[~np.isnan(self.LC)] # Time
+        self.E_LC = self.LC[~np.isnan(self.LC)] # Lightcurve
+        self.LC = self.LC[~np.isnan(self.LC)] # Lightcurve
+        
+        self.TIME = self.TIME + bjdrefi + bjdreff # Converts to Barycentric Julian Day
+        mean = np.mean(self.LC)
+        self.LC = (self.LC/mean - 1) * 10**6#/std
+        # How to turn E_LC into ppm???
+        
+        self.FREQS = frequency_grid(self.TIME)
+        P_LS = lomb_scargle(self.TIME, self.LC, self.E_LC, self.FREQS)
+        self.A_LS = np.sqrt(4*P_LS / len(self.LC)) * 10 ** 6
+    
     def writeCSV(self):
         directory = 'k2c'+ str(self.CAMPAIGN) + '/csv/'
         atts = tuple(self.__dict__.items())
@@ -139,7 +165,7 @@ class ObjectID(object):
         with open(directory + str(self.EPIC) + '.csv', 'w') as file:
             write = csv.writer(file, delimiter='|', quoting = csv.QUOTE_MINIMAL)
             for i in range(len(atts)):
-                if i not in (4, 5):
+                if i not in (range(4,9)):
                     write.writerow([atts[i][0], atts[i][1]])
         
         del atts
@@ -155,16 +181,18 @@ class ObjectID(object):
                 comments.append(line)
         
         head = fits.Header() # Defines Header for PrimaryHDU
-        for i in range(1,len(atts)): # Iteration to create and assign Cards of attributes for Header (Except LC and Time)
-            if i not in (4,5):
+        for i in range(1,len(atts)): # Iteration to create and assign Cards of attributes for Header (Except TIME, LC+E, FREQS and A_LS)
+            if i not in (range(4,9)):
                 c = fits.Card(atts[i][0], atts[i][1], comments[i])
                 head.append(c)
         phdu = fits.PrimaryHDU(header = head) # Creates PrimaryHDU from defined Header. == Metadata Here ==
         
         # Define columns to be used in a BinTable
         colt = fits.Column(name = 'TIME', format = 'E', unit = 'd', array = self.TIME) # Time Column
-        collc = fits.Column(name = 'LC', format = 'E', unit = 'e-/s', array = self.LC) # LC Column
-        coldefs = fits.ColDefs([colt, collc]) # "Zips" the columns together
+        collc = fits.Column(name = 'LC', format = 'E', unit = 'ppm', array = self.LC) # LC Column
+        colelc = fits.Column(name = 'E_LC', format = 'E', unit = 'ppm', array = self.E_LC) # LC Column
+        colps = fits.Column(name = 'PS', format = 'E', unit = 'ppm', array = self.PS) # PS Column
+        coldefs = fits.ColDefs([colt, collc, colps]) # "Zips" the columns together
         binthdu = fits.BinTableHDU.from_columns(coldefs) # Creates a BinTableHDU from the zipped columns
         binthdu.name = 'DATA'
         

@@ -41,22 +41,25 @@ class Menu(tk.Frame):
         self.readCampaigns()
         
         self.campaign_str = tk.StringVar()
-        self.campaign_str.set('Select a Campaign')
-        self.campaign_menu = tk.OptionMenu(parent, self.campaign_str, *self.campaigns)
-        self.campaign_menu.grid(row = 0, column = 1)
+        self.campaign_str.set(self.campaigns[0])
+        
+        self.campaign_menu = tk.OptionMenu(self, self.campaign_str, *self.campaigns)
+        self.campaign_menu.grid(row = 0, column = 0, sticky = tk.N)
+        
+        self.listFiles()
         
         frame_file_list = tk.Frame(self)
-        frame_file_list.grid(row = 1, column = 1)
+        frame_file_list.grid(row = 1, column = 0)
         
         self.scrollbar = tk.Scrollbar(frame_file_list)
-        self.scrollbar.grid(row = 1, column = 1)
+        self.scrollbar.grid(row = 0, column = 1)
         
-        self.list = tk.Listbox(frame_file_list, yscrollcommand = self.scrollbar.set)
-        for line in range(100):
-            self.list.insert(tk.END, "This is line number " + str(line))
+        self.list = tk.Listbox(frame_file_list, yscrollcommand = self.scrollbar.set, width = 16)
+        for file in self.filelist:
+            self.list.insert(tk.END, file)
         
-        self.list.grid(row = 1, column = 0)
-        self.scrollbar.config( command = self.list.yview )
+        self.list.grid(row = 0, column = 0)
+        self.scrollbar.config(command = self.list.yview)
         
     def readCampaigns(self):
         with open('etc/config.txt') as config:
@@ -64,11 +67,15 @@ class Menu(tk.Frame):
             for line in read:
                 if 'campaigns available' in line:
                     self.campaigns = []
+                    self.campaign_nums = []
                     for i in range(1,len(line)):
                             self.campaigns.append('Campaign ' + line[i])
+                            self.campaign_nums.append(line[i])
+                    self.campaign_dic = dict(zip(self.campaigns, self.campaign_nums))
     
     def listFiles(self):
-        None
+        directory = 'k2c' + self.campaign_dic[self.campaign_str.get()] + '/data/'
+        self.filelist = os.listdir(directory)
 
 class MainApp(tk.Tk):
     
@@ -82,7 +89,7 @@ class MainApp(tk.Tk):
         self.Canvas.grid(row = 0, column = 0)
         
         self.Menu = Menu(self)
-        self.Menu.grid(row = 0, column = 1, sticky = tk.E)
+        self.Menu.grid(row = 0, column = 1, sticky = tk.N+tk.S)
         
 
 app = MainApp()

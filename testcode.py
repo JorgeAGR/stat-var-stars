@@ -2,41 +2,55 @@ from astropy.io import fits
 from astropy.table import Table
 import numpy as np
 import numpy.fft as fft
+import scipy.signal as signal
 import matplotlib.pyplot as plt
 #import pandas as pd
 #import openpyxl
 import csv
+from astroML.time_series import lomb_scargle, lomb_scargle_bootstrap
 
 # Seperate into two classes Object and LightCurve
-# H, J and K magnitudes Derived properties.
-#for every object: txt with metadata and fits for data
 
-#
+# Look into Astropy LombScargle Periodogram (Astropy?)
+
+#power spectra
+# ppm
+# amplitudes sqrt(4*ps / N)
 
 class LightCurve(object):
     
     def __init__(self,hdul):
         
         self.lc = hdul[1].data['PDCSAP_FLUX'] # Lightcurve
-        self.time = hdul[1].data['TIMECORR'] # Time
+        self.time = hdul[1].data['TIME'] # Time
+        self.dlc = hdul[1].data['PDCSAP_FLUX_ERR'] # Lightcurve Error
         
         self.time = self.time[~np.isnan(self.lc)]
+        self.dlc = self.dlc[~np.isnan(self.lc)]
         self.lc = self.lc[~np.isnan(self.lc)]
         
+        bjdrefi = hdul[1].header['BJDREFI']
+        bjdreff = hdul[1].header['BJDREFF']
+        self.time = self.time + bjdrefi + bjdreff
+        
         self.standarize()
-        self.powerSpectrum()
+        self.amplitudeSpectrum()
     
     def standarize(self):
         mean = np.mean(self.lc)
         #std = np.std(self.lc)
-        self.lc = (self.lc - mean)#/std
+        self.lc = (self.lc/mean - 1) * 10**6#/std
     
-    def powerSpectrum(self):
-        self.freq = fft.fftfreq(len(self.time), d = 1)
-        self.freq = fft.fftshift(self.freq)
-        self.ps = np.abs((fft.fft(self.lc)))**2
-        self.ps = fft.fftshift(self.ps)
-    
+    def amplitudeSpectrum(self):
+        def frequency_grid(time):
+            freq_min = 2*np.pi / (time[-1] - time[0])
+            freq_max = np.pi / np.median(time[1:] - time[:-1])
+            n_bins = int(np.round(5 * (freq_max - freq_min)/freq_min))
+            return np.linspace(freq_min, freq_max, n_bins)
+        
+        self.freqs = frequency_grid(self.time)
+        P_LS = lomb_scargle(self.time, self.lc, self.dlc, self.freqs)
+        self.A_LS = np.sqrt(4*P_LS / len(self.lc)) * 10 ** 6
 
 class Object(object):
     
@@ -70,17 +84,17 @@ class Object(object):
     
     def plot(self):
         fig, ax = plt.subplots()
-        ax.plot(self.data.lc)
+        ax.plot(self.data.time, self.data.lc)
         #ax.plot(self.data.ps)
         ax.set_title('Object ID: ' + str(self.id) + '   Campaign: ' + str(self.campaign))
         ax.grid()
     
-    def plotPS(self):
+    def plotAS(self):
         fig, ax = plt.subplots()
-        ax.plot(self.data.freq, self.data.ps)
+        ax.plot(self.data.freqs, self.data.A_LS)
         #ax.plot(self.data.ps)
         ax.set_title('Object ID: ' + str(self.id) + '   Campaign: ' + str(self.campaign))
-        ax.set_xlim(0,max(self.data.freq))
+        #ax.set_xlim()
         #ax.set_yscale('log')
         #ax.set_ylim(0,10**8)
         ax.grid()
@@ -145,14 +159,14 @@ class Object(object):
             self.lctable = Table(hdul[1].data)'''
 
 
-test1 = Object('k2c4/k2fits/testlc1.fits')
-test2 = Object('k2c4/k2fits/testlc2.fits')
-test3 = Object('k2c4/k2fits/testlc3.fits')
+test1 = Object('k2c4/k2fits/ktwo210359769-c04_llc.fits')
+test2 = Object('k2c4/k2fits/ktwo210384590-c04_llc.fits')
+test3 = Object('k2c4/k2fits/ktwo210517342-c04_llc.fits')
 
-test3.data.standarize()
+#test3.data.standarize()
 #test2.data.standarize()
 
-test3.data.powerSpectrum()
+#test3.data.powerSpectrum()
 #test2.data.powerSpectrum()
 
-test3.plotPS()
+test3.plotAS()
