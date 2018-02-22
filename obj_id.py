@@ -193,7 +193,7 @@ class ObjectID(object):
         collc = fits.Column(name = 'LC', format = 'E', unit = 'ppm', array = self.LC) # LC Column
         colelc = fits.Column(name = 'E_LC', format = 'E', unit = 'ppm', array = self.E_LC) # LC Column
         colfreq = fits.Column(name = 'FREQS', format = 'E', unit = '1/d', array = self.FREQS) # LC Column
-        colps = fits.Column(name = 'PS', format = 'E', unit = 'ppm', array = self.PS) # PS Column
+        colps = fits.Column(name = 'AMP_LOMBSCARG', format = 'E', unit = 'ppm', array = self.A_LS) # PS Column
         coldefs = fits.ColDefs([colt, collc, colelc, colfreq, colps]) # "Zips" the columns together
         binthdu = fits.BinTableHDU.from_columns(coldefs) # Creates a BinTableHDU from the zipped columns
         binthdu.name = 'DATA'
