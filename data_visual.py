@@ -15,6 +15,38 @@ import numpy as np
 import numpy.fft as fft
 import matplotlib.pyplot as plt
 
+# == Data Classes == #
+
+class Object(object):
+    
+    def __init__(self, file):
+        self.file = file  #String of name of the file
+        
+        self.titles = []
+        self.values = []
+        
+        with fits.open(self.file) as hdul:
+            for i in range(len(hdul)):
+                for title in hdul[i].header:
+                    if title not in ('SIMPLE', 'BITPIX', 'NAXIS', 'EXTEND', 'EXTNAME'):
+                        if i == 0:
+                            self.titles.append(title)
+                            self.values.append(hdul[i].header[title])
+                        else:
+                            if title in ('TTYPE1', 'TTYPE2', 'TTYPE3'):
+                                self.titles.append(hdul[i].header[title])
+                                self.values.append(hdul[i].data[hdul[i].header[title]])
+                            if title in ('TUNIT1', 'TUNIT2', 'TUNIT3'):
+                                self.titles.append(hdul[i].header['TTYPE'+title[-1]]+' UNIT')
+                                self.values.append(hdul[i].header[title])
+        
+        self.cards = dict(zip(self.titles,self.values))
+    
+    def setFlag(self,integer):
+        self.flag = integer
+
+# == GUI Classes == #
+
 class PlotCanvas(tk.Frame):
     
     def __init__(self,parent):
@@ -43,10 +75,8 @@ class Menu(tk.Frame):
         self.campaign_str = tk.StringVar()
         self.campaign_str.set(self.campaigns[0])
         
-        self.campaign_menu = tk.OptionMenu(self, self.campaign_str, *self.campaigns)
+        self.campaign_menu = tk.OptionMenu(self, self.campaign_str, *self.campaigns, command = self.menuTrigger)
         self.campaign_menu.grid(row = 0, column = 0, sticky = tk.N)
-        
-        self.listFiles()
         
         frame_file_list = tk.Frame(self)
         frame_file_list.grid(row = 1, column = 0)
@@ -55,11 +85,10 @@ class Menu(tk.Frame):
         self.scrollbar.grid(row = 0, column = 1, sticky = 'NS')
         
         self.list = tk.Listbox(frame_file_list, yscrollcommand = self.scrollbar.set, width = 16)
-        for file in self.filelist:
-            self.list.insert(tk.END, file)
-        
         self.list.grid(row = 0, column = 0, sticky = 'NS')
         self.scrollbar.config(command = self.list.yview)
+        
+        self.listFiles()
         
     def readCampaigns(self):
         with open('etc/config.txt') as config:
@@ -76,6 +105,17 @@ class Menu(tk.Frame):
     def listFiles(self):
         directory = 'k2c' + self.campaign_dic[self.campaign_str.get()] + '/data/'
         self.filelist = os.listdir(directory)
+        self.list.delete(0,tk.END)
+        for file in self.filelist:
+            self.list.insert(tk.END, file)
+        
+        if self.filelist == '':
+            print('nope!')
+    
+    def menuTrigger(self, event):
+        self.listFiles()
+
+# == Main Class == #
 
 class MainApp(tk.Tk):
     
@@ -106,12 +146,15 @@ class MainApp(tk.Tk):
     def plot(self):
         
         # Maybe use Object class to manage all this file info
-        directory = 'k2c'+ self.Menu.campaign_dic[self.Menu.campaign_str.get()] + '/data/' + self.Menu.list.get(tk.ACTIVE)
-        with fits.open(directory) as hdul:
-            time = hdul[1].data['TIME']
-            lc = hdul[1].data['LC']
-            freq = hdul[2].data['FREQS']
-            A_LS = hdul[2].data['AMP_LOMBSCARG']
+        file = 'k2c'+ self.Menu.campaign_dic[self.Menu.campaign_str.get()] + '/data/' + self.Menu.list.get(tk.ACTIVE)
+        
+        obj = Object(file)
+        time = obj.cards['TIME']
+        lc = obj.cards['LC']
+        freq = obj.cards['FREQS']
+        als = obj.cards['AMP_LOMBSCARG']
+        
+        time = time - time[0]
         
         self.CanvasLC.ax.clear()
         plt.figure(1)
@@ -123,7 +166,7 @@ class MainApp(tk.Tk):
         self.CanvasA_LS.ax.clear()
         plt.figure(2)
         #self.CanvasA_LS.ax.
-        plt.plot(freq, A_LS)
+        plt.plot(freq, als)
         
         self.CanvasLC.f.canvas.draw()
         self.CanvasA_LS.f.canvas.draw()
