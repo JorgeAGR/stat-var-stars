@@ -4,6 +4,7 @@ import numpy as np
 import numpy.fft as fft
 import scipy.signal as signal
 import matplotlib.pyplot as plt
+import itertools
 #import pandas as pd
 #import openpyxl
 import csv
@@ -38,19 +39,41 @@ class LightCurve(object):
     
     def standarize(self):
         mean = np.mean(self.lc)
+        std = np.std(self.lc)
+        
+        #Jackiewicz  2011
+        bad = np.where(np.std(np.diff(self.lc))*5 < np.abs(np.diff(self.lc)))
+        indy = []
+        for b in bad[0]:
+            if (self.lc[b] > (mean + 8*np.std(self.lc))) or (self.lc[b] < (mean - 8*np.std(self.lc))):
+                indy.append(b)
+        if indy:
+            self.time = np.delete(self.time, indy)
+            self.dlc = np.delete(self.dlc, indy)
+            self.lc = np.delete(self.lc, indy)
+                
+        mean = np.mean(self.lc)
+        median = np.median(self.lc)
         #std = np.std(self.lc)
-        self.lc = (self.lc/mean - 1) * 10**6#/std
+        self.lc = (self.lc/mean - 1) * 10**6#/
+        self.dlc = (self.dlc - mean)
     
     def amplitudeSpectrum(self):
-        def frequency_grid(time):
-            freq_min = 2*np.pi / (time[-1] - time[0])
-            freq_max = np.pi / np.median(time[1:] - time[:-1])
-            n_bins = int(np.round(5 * (freq_max - freq_min)/freq_min))
-            return np.linspace(freq_min, freq_max, n_bins)
+        def frequency_grid(time, oversampling):
+            period = time[-1] - time[0]
+            dt = period / len(time)
+            df = 1/period/5
+            fmax = 1/(2*dt)
+            fmin = df
+            freqs = np.arange(fmin, fmax, df)
+            omegas = 2*np.pi*freqs
+            
+            return freqs, omegas
         
-        self.freqs = frequency_grid(self.time)
-        P_LS = lomb_scargle(self.time, self.lc, self.dlc, self.freqs)
-        self.A_LS = np.sqrt(4*P_LS / len(self.lc)) * 10 ** 6
+        self.freqs, self.omegas = frequency_grid(self.time, 1)
+        #self.P_LS = lomb_scargle(self.time, self.lc, self.dlc, self.omegas)
+        self.P_LS = signal.lombscargle(self.time, self.lc, self.omegas)
+        self.A_LS = np.sqrt(4*self.P_LS / len(self.lc))
 
 class Object(object):
     
@@ -68,7 +91,7 @@ class Object(object):
             
             self.ra = hdul[0].header['RA_OBJ'] # RA
             self.dec = hdul[0].header['DEC_OBJ'] # Declination
-            self.parallax = hdul[0].header['PARALLAX'] # Parallax
+            self.parallax = str(hdul[0].header['PARALLAX']) # Parallax
             self.data = LightCurve(hdul)
             
             self.cadence = hdul[0].header['OBSMODE'] # Long/short cadence observation
@@ -84,7 +107,7 @@ class Object(object):
     
     def plot(self):
         fig, ax = plt.subplots()
-        ax.plot(self.data.time, self.data.lc)
+        ax.plot(self.data.time, self.data.lc, 'o')
         #ax.plot(self.data.ps)
         ax.set_title('Object ID: ' + str(self.id) + '   Campaign: ' + str(self.campaign))
         ax.grid()
@@ -159,8 +182,13 @@ class Object(object):
             self.lctable = Table(hdul[1].data)'''
 
 
-test1 = Object('k2c4/k2fits/ktwo210359769-c04_llc.fits')
-test2 = fits.open('k2c4/data/210359769.fits')
+test1 = Object('k2c4/k2fits/ktwo210880560-c04_llc.fits')
+test2 = fits.open('k2c4/k2fits/ktwo210878635-c04_llc.fits')
+data = test1.data.lc
+time = test1.data.time
+#p = test1.data.P_LS
+test1.plot()
+test1.plotAS()
 #test2 = Object('k2c4/k2fits/ktwo210384590-c04_llc.fits')
 #test3 = Object('k2c4/k2fits/ktwo210517342-c04_llc.fits')
 

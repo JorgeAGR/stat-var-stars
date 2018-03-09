@@ -6,7 +6,8 @@ and writes a new FITS file with everything
 '''
 from astropy.io import fits
 import numpy as np
-from astroML.time_series import lomb_scargle
+#from astroML.time_series import lomb_scargle
+from scipy.signal import lombscargle
 import csv
 import os
 
@@ -74,6 +75,7 @@ class ObjectID(object):
             
             # Flag determines interest in data. 0 - Unprocessed.
             # 0 - Unprocessed. 1 - Priority. 2 - Good. 3 -Trash
+            #self.FLAG = np.array([0])
             self.FLAG = 0
             
             self.MODULE = hdul[0].header['MODULE'] # CCD Module Number
@@ -82,12 +84,13 @@ class ObjectID(object):
             
             self.RA = hdul[0].header['RA_OBJ'] # RA
             self.DEC = hdul[0].header['DEC_OBJ'] # Declination
-            self.PARALLAX = hdul[0].header['PARALLAX'] # Parallax
+            #self.PARALLAX = str(hdul[0].header['PARALLAX']) # Parallax. Left out due to buggy behavior
             
             self.CADENCE = hdul[0].header['OBSMODE'] # Long/short cadence observation
             
             self.searchEpic()
             self.writeCSV()
+            self.createFlags()
             self.writeData()
     
     def searchEpic(self):
@@ -136,11 +139,15 @@ class ObjectID(object):
                     break
     
     def processData(self):
-        def frequency_grid(time):
-            freq_min = 2*np.pi / (time[-1] - time[0])
-            freq_max = np.pi / np.median(time[1:] - time[:-1])
-            n_bins = int(np.round(5 * (freq_max - freq_min)/freq_min))
-            return np.linspace(freq_min, freq_max, n_bins)
+        def frequency_grid(time, oversampling):
+            period = time[-1] - time[0]
+            dt = period / len(time)
+            df = 1/period/oversampling
+            fmax = 1/(2*dt)
+            fmin = df
+            freqs = np.arange(fmin, fmax, df)
+            omegas = 2*np.pi*freqs
+            return freqs, omegas
         
         with fits.open(self.file) as hdul:
             bjdrefi = hdul[1].header['BJDREFI']
@@ -150,26 +157,44 @@ class ObjectID(object):
         self.E_LC = self.LC[~np.isnan(self.LC)] # Lightcurve
         self.LC = self.LC[~np.isnan(self.LC)] # Lightcurve
         
+                #Jackiewicz  2011
+        bad = np.where(np.std(np.diff(self.LC))*5 < np.abs(np.diff(self.LC)))
+        mean = np.mean(self.LC)
+        indy = []
+        for b in bad[0]:
+            if (self.LC[b] > (mean + 8*np.std(self.LC))) or (self.LC[b] < (mean - 8*np.std(self.LC))):
+                indy.append(b)
+        if indy:
+            self.TIME = np.delete(self.TIME, indy)
+            self.E_LC = np.delete(self.E_LC, indy)
+            self.LC = np.delete(self.LC, indy)
+        
         self.TIME = self.TIME + bjdrefi + bjdreff # Converts to Barycentric Julian Day
         mean = np.mean(self.LC)
-        self.LC = (self.LC/mean - 1) * 10**6#/std
+        self.LC = (self.LC/mean - 1) * 10**6
         # How to turn E_LC into ppm???
         
-        self.FREQS = frequency_grid(self.TIME)
-        P_LS = lomb_scargle(self.TIME, self.LC, self.E_LC, self.FREQS)
-        self.A_LS = np.sqrt(4*P_LS / len(self.LC)) * 10 ** 6
+        self.FREQS, omegas = frequency_grid(self.TIME, 1)
+        #P_LS = lomb_scargle(self.TIME, self.LC, self.E_LC, omegas)
+        P_LS = lombscargle(self.TIME, self.LC, omegas)
+        self.A_LS = np.sqrt(4*P_LS / len(self.LC))
     
     def writeCSV(self):
         directory = 'k2c'+ str(self.CAMPAIGN) + '/csv/'
         atts = tuple(self.__dict__.items())
         
-        with open(directory + str(self.EPIC) + '.csv', 'w') as file:
+        with open(directory + str(self.EPIC) + '.csv', 'w+') as file:
             write = csv.writer(file, delimiter='|', quoting = csv.QUOTE_MINIMAL)
             for i in range(len(atts)):
-                if i not in (range(4,9)):
+                if i not in (range(4,10)):
                     write.writerow([atts[i][0], atts[i][1]])
-        
         del atts
+    
+    def createFlags(self):
+        directory = 'k2c'+ str(self.CAMPAIGN) + '/flags/'
+        
+        with open(directory + str(self.EPIC) + '.txt', 'w+') as file:
+            file.write(str(self.FLAG))
     
     def writeData(self):
         directory = 'k2c' + str(self.CAMPAIGN) + '/data/' # Sets string for directory according to campaign
@@ -183,17 +208,18 @@ class ObjectID(object):
         
         head = fits.Header() # Defines Header for PrimaryHDU
         for i in range(1,len(atts)): # Iteration to create and assign Cards of attributes for Header (Except TIME, LC+E, FREQS and A_LS)
-            if i not in (range(4,9)):
-                c = fits.Card(atts[i][0], atts[i][1], comments[i])
+            if i not in (range(4,10)):
+                c = fits.Card(atts[i][0], atts[i][1], comments[i-1])
                 head.append(c)
         phdu = fits.PrimaryHDU(header = head) # Creates PrimaryHDU from defined Header. == Metadata Here ==
         
         # Define columns to be used in a BinTable
         colt = fits.Column(name = 'TIME', format = 'E', unit = 'Days (d)', array = self.TIME) # Time Column
-        collc = fits.Column(name = 'LC', format = 'E', unit = 'Parts per M (ppm)', array = self.LC) # LC Column
-        colelc = fits.Column(name = 'E_LC', format = 'E', unit = 'Parts per M (ppm)', array = self.E_LC) # LC Column
+        collc = fits.Column(name = 'LC', format = 'E', unit = 'Amplitude (ppm)', array = self.LC) # LC Column
+        colelc = fits.Column(name = 'E_LC', format = 'E', unit = 'Amplitude (ppm)', array = self.E_LC) # LC Column
         colfreq = fits.Column(name = 'FREQS', format = 'E', unit = 'Cycles per Day (1/d)', array = self.FREQS) # LC Column
-        colps = fits.Column(name = 'AMP_LOMBSCARG', format = 'E', unit = 'Parts per M (ppm)', array = self.A_LS) # PS Column
+        colps = fits.Column(name = 'AMP_LOMBSCARG', format = 'E', unit = 'Amplitude (ppm)', array = self.A_LS) # PS Column
+        #colflag = fits.Column(name = 'FLAGS', format = 'I', array = self.FLAG)
         
         coldefsdata = fits.ColDefs([colt, collc, colelc]) # "Zips" the columns together
         binthdudata = fits.BinTableHDU.from_columns(coldefsdata) # Creates a BinTableHDU from the zipped columns
@@ -203,7 +229,13 @@ class ObjectID(object):
         binthduamp = fits.BinTableHDU.from_columns(coldefsamp)
         binthduamp.name = 'SPECTRUM'
         
-        hdul = fits.HDUList([phdu, binthdudata, binthduamp]) # Creates an HDUList from the PrimaryHDU and BinTableHDU
+        # Fix flags here? Need to get to work!
+        
+        '''coldefsflag = fits.ColDefs([colflag])
+        binthduflag = fits.BinTableHDU.from_columns(coldefsflag)
+        binthduflag.name = 'FLAG HIST'''
+        
+        hdul = fits.HDUList([phdu, binthdudata, binthduamp])#, binthduflag]) # Creates an HDUList from the PrimaryHDU and BinTableHDU
         hdul.writeto(directory + str(self.EPIC) + '.fits') # Writes to assigned directory with object's EPIC ID
 
 #test1 = ObjectID('k2c4/k2fits/testlc1.fits')
