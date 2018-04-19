@@ -3,6 +3,7 @@
 + Goes through FITS files, digs up some metadata
 and lightcurves. Searches for more meta data
 and writes a new FITS file with everything
++ Look for C14 and C15
 '''
 from astropy.io import fits
 import numpy as np
@@ -47,6 +48,7 @@ class CampaignManager(object):
         filelist = os.listdir(directory)
         
         for f in filelist:
+            print(directory+f)
             ObjectID(directory+f)
         print('Done!')
         repeat = input('Do another campaign?: ')
@@ -65,7 +67,10 @@ class ObjectID(object):
             self.KEPLERID = int(hdul[0].header['KEPLERID']) #  Kepler ID
             self.EPIC = int(hdul[0].header['OBJECT'].strip('EPIC')) # EPIC ID.
                 # Removes the 'EPIC' prefix from the ID.
-            self.CAMPAIGN = hdul[0].header['CAMPAIGN'] # Campaign Number
+            self.CAMPAIGN = str(hdul[0].header['CAMPAIGN']) # Campaign Number
+            
+            if self.CAMPAIGN in ['101', '102', '111', '112']:
+                self.CAMPAIGN = self.CAMPAIGN[:-1]
             
             self.LC = hdul[1].data['PDCSAP_FLUX'] # Lightcurve w/ NaNs
             self.E_LC = hdul[1].data['PDCSAP_FLUX_ERR'] # Lightcurve Error w/ NaNs

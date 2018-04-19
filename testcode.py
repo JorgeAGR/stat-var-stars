@@ -181,14 +181,14 @@ class Object(object):
         with fits.open(self.file) as hdul:
             self.lctable = Table(hdul[1].data)'''
 
-
+'''
 test1 = Object('k2c4/k2fits/ktwo210880560-c04_llc.fits')
 test2 = fits.open('k2c4/k2fits/ktwo210878635-c04_llc.fits')
 data = test1.data.lc
 time = test1.data.time
 #p = test1.data.P_LS
 test1.plot()
-test1.plotAS()
+test1.plotAS()'''
 #test2 = Object('k2c4/k2fits/ktwo210384590-c04_llc.fits')
 #test3 = Object('k2c4/k2fits/ktwo210517342-c04_llc.fits')
 
@@ -199,3 +199,4 @@ test1.plotAS()
 #test2.data.powerSpectrum()
 
 #test3.plotAS()
+
