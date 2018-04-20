@@ -2,8 +2,6 @@
 == Classifier App ==
 + Simple GUI that allows visualization of data
 for human analysis purpose
-- Implement flag updating
-- Add a search bar
 '''
 import tkinter as tk
 #matplotlib.use("TkAgg")
@@ -547,9 +545,9 @@ class MainApp(tk.Tk):
         self.Canvas.axlc.clear()
         plt.figure(1)
         #self.CanvasLC.ax.
-        plt.plot(time, lc)
+        plt.plot(time, lc, linewidth = 1)
         #self.CanvasLC.ax.set_xticks(np.arange(min(time), max(time)+1,10000))
-        plt.title('Object ID: ' + str(self.obj.cards['EPIC']) + '   Flag: ' + flag2label(int(flag)), fontsize = 14)
+        plt.title('Object ID: ' + str(self.obj.cards['EPIC']) + '   Type: ' + flag2label(int(flag)), fontsize = 14)
         plt.xlabel('Time $(d)$')
         plt.ylabel('Amplitude $(ppm)$')
         plt.ticklabel_format(style = 'sci', scilimits = (0,0), axis = 'y', useMathText = False)
@@ -577,7 +575,7 @@ class MainApp(tk.Tk):
         self.Canvas.axas.clear()
         plt.figure(2)
         #self.CanvasA_LS.ax.
-        plt.plot(freq, als)
+        plt.plot(freq, als, linewidth = 1)
         plt.axvline(x = 5, linestyle = ':', color = 'black')
         plt.axvline(x = 4.075, linestyle = ':', color = 'red')
         plt.axvline(x = 4.075*2, linestyle = ':', color = 'red')
@@ -714,8 +712,8 @@ class MainApp(tk.Tk):
             flagdir = 'k2c' + self.Menu.campaign_dic[self.Menu.campaign_str.get()] + '/flags/' + f[0:9] + '.txt'
             
             self.obj = Object(file, flagdir)
-            #fig, ax = plt.subplots(nrows = 2, ncols = 1)
-            fig = plt.figure()
+            
+            fig = plt.figure(figsize = (16, 8))
             ax0 = fig.add_axes([0.1,0.5,0.8,0.3])
             ax1 = fig.add_axes([0.1,0.1,0.8,0.3])
             
@@ -727,13 +725,13 @@ class MainApp(tk.Tk):
             
             time = time - time[0]
             
-            ax0.plot(time, lc)
-            ax0.set_title('Object ID: ' + str(self.obj.cards['EPIC']) + '   Flag: ' + flag2label(int(flag)), fontsize = 8)
-            ax0.set_xlabel('Time $(d)$', fontsize = 6)
-            ax0.set_ylabel('Amplitude $(ppm)$', fontsize = 6)
+            ax0.plot(time, lc, linewidth = 1)
+            ax0.set_title('Object ID: ' + str(self.obj.cards['EPIC']) + '   Type: ' + flag2label(int(flag)), fontsize = 12)
+            ax0.set_xlabel('Time $(d)$', fontsize = 10)
+            ax0.set_ylabel('Amplitude $(ppm)$', fontsize = 10)
             ax0.ticklabel_format(style = 'sci', scilimits = (0,0), axis = 'y', useMathText = False)
-            ax0.tick_params(axis = 'both', which = 'both', labelsize = 5)
-            ax0.yaxis.offsetText.set_fontsize(5)
+            ax0.tick_params(axis = 'both', which = 'both', labelsize = 8)
+            ax0.yaxis.offsetText.set_fontsize(8)
             ax0.xaxis.set_major_locator(MultipleLocator(10))
             ax0.xaxis.set_minor_locator(MultipleLocator(2))
             ax0.grid()
@@ -752,7 +750,7 @@ class MainApp(tk.Tk):
             else:
                 None
             
-            ax1.plot(freq, als)
+            ax1.plot(freq, als, linewidth = 1)
             ax1.axvline(x = 5, linestyle = ':', color = 'black')
             ax1.axvline(x = 4.075, linestyle = ':', color = 'red')
             ax1.axvline(x = 4.075*2, linestyle = ':', color = 'red')
@@ -760,11 +758,11 @@ class MainApp(tk.Tk):
             ax1.axvline(x = 4.075*4, linestyle = ':', color = 'red')
             ax1.axvline(x = 4.075*5, linestyle = ':', color = 'red')
             ax1.set_ylim(0,None)
-            ax1.set_xlabel('Cycles per Day $(1/d)$', fontsize = 6)
-            ax1.set_ylabel('Amplitude $(ppm)$', fontsize = 6)
+            ax1.set_xlabel('Cycles per Day $(1/d)$', fontsize = 10)
+            ax1.set_ylabel('Amplitude $(ppm)$', fontsize = 10)
             ax1.ticklabel_format(style = 'sci', scilimits = (0,0), axis = 'y', useMathText = False)
-            ax1.tick_params(axis = 'both', which = 'both', labelsize = 5)
-            ax1.yaxis.offsetText.set_fontsize(5)
+            ax1.tick_params(axis = 'both', which = 'both', labelsize = 8)
+            ax1.yaxis.offsetText.set_fontsize(8)
             ax1.grid()
             
             if self.ASTools.maxx.get() and self.ASTools.minx.get():
@@ -780,34 +778,48 @@ class MainApp(tk.Tk):
             
             i = 0
             x1 = x2 = 0.075
+            x3 = 0.675
             y1 = 0.95
-            y2 = 0.925
-            skip = 0
+            y2 = 0.90
+            skip1 = 0
+            skip2 = 0
             while True:
                 i += 1
                 valuetitle = str(list(self.obj.cards.keys())[i])
                 uncertaintytitle = str(list(self.obj.cards.keys())[i+1])
-                if (i != 14) and (i >= 8):
+                if i in [15, 17]:
+                    text = valuetitle + ': ' + str(self.obj.cards[valuetitle]) + ' +/- ' + str(self.obj.cards[uncertaintytitle])
+                    plt.figtext(x3, 0.825, text, horizontalalignment='left',
+                        fontsize=10, multialignment='left')
+                    i += 1
+                    x3 += 0.125
+                elif (i != 14) and (i >= 8):
                     text = valuetitle + ': ' + str(self.obj.cards[valuetitle]) + ' +/- ' + str(self.obj.cards[uncertaintytitle])
                     plt.figtext(x2, y2, text, horizontalalignment='left',
-                        fontsize=5, multialignment='left')
+                        fontsize=10, multialignment='left')
                     i += 1
                     x2 += 0.15
-                    skip += 1
-                    if skip == 6:
+                    skip2 += 1
+                    if skip2 == 5:
                         y2 += -0.025
                         x2 = 0.075
-                        skip = 0
+                        skip2 = 0
                 else:
                     text = valuetitle + ': ' + str(self.obj.cards[valuetitle])
                     plt.figtext(x1, y1, text, horizontalalignment='left',
-                        fontsize=5, multialignment='left')
-                    if i == 1:
-                        x1 += 0.125
+                        fontsize=10, multialignment='left')
+                    x1 += 0.15
+                    skip1 += 1
+                    if skip1 == 4:
+                        y1 += -0.025
+                        x1 = 0.075
+                        skip1 = 0
+                    '''
                     elif i == 7:
                         x1 += 0.175
                     else:
                         x1 += 0.1
+                    '''
                 if i == 32:
                     break
             
