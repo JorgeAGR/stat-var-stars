@@ -2,8 +2,6 @@ import numpy as np
 import os
 from astropy.io import fits
 
-campaigns = [4, 5, 6, 7, 8]#, 10, 11, 12, 13, 14, 15, 16]
-
 class Object(object):
     
     def __init__(self, file, flagdir):
@@ -47,21 +45,37 @@ class Object(object):
         with open(self.flagdir) as file:
             for line in file:
                 self.FLAGS.append(line)
-stars = np.array([])
-teff = np.array([])
-logg = np.array([])
-flag = np.array([])
-for i in campaigns:
-    directory = 'k2c' + str(i) + '/data/'
-    f = os.listdir(directory)
-    for file in f:
-        print(file, i)
-        filedir = 'k2c'+ str(i) + '/data/' + file
-        flagdir = 'k2c' + str(i) + '/flags/' + file[0:9] + '.txt'
-        obj = Object(filedir, flagdir)
-        stars = np.append(stars, file.rstrip('.fits'))
-        teff = np.append(teff, obj.cards['TEFF'])
-        logg = np.append(logg, obj.cards['LOGG'])
-        flag = np.append(flag, int(obj.FLAGS[-1]))
 
-np.savez('tnldict.npz', stars = stars, teff = teff, logg = logg, flag = flag)
+
+def stardic():
+    
+    print('Updating Starlist...')
+    
+    
+    campaigns = []
+    for d in os.listdir():
+            if 'k2c' in d:
+                campaigns.append(int(d.lstrip('k2c')))
+    campaigns = np.sort(campaigns)
+    #campaigns = [4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16]
+    
+    stars = np.array([])
+    teff = np.array([])
+    logg = np.array([])
+    flag = np.array([])
+    for i in campaigns:
+        directory = 'k2c' + str(i) + '/data/'
+        f = os.listdir(directory)
+        print(str(len(f)) + ' files in Campaign ' + str(i))
+        for file in f:
+            filedir = 'k2c'+ str(i) + '/data/' + file
+            flagdir = 'k2c' + str(i) + '/flags/' + file[0:9] + '.txt'
+            obj = Object(filedir, flagdir)
+            stars = np.append(stars, file.rstrip('.fits'))
+            teff = np.append(teff, obj.cards['TEFF'])
+            logg = np.append(logg, obj.cards['LOGG'])
+            flag = np.append(flag, int(obj.FLAGS[-1]))
+    
+    np.savez('tnldict.npz', stars = stars, teff = teff, logg = logg, flag = flag)
+    
+    print('Starlist updated!')

@@ -11,42 +11,90 @@ import numpy as np
 from scipy.signal import lombscargle
 import csv
 import os
+import subprocess
+import createnpz
 
 class CampaignManager(object):
      
     def __init__(self):
         
-        print('Developed by: Jorge A. Garcia @ New Mexico State University')
+        print('\nDeveloped by: Jorge A. Garcia @ New Mexico State University')
         
         self.main()
     
     def main(self):
         
-        main = '=Menu=\n1) Process\n2) Exit\nSelect an option: '
-        
-        option = input(main)
-        
-        if option in ('1', 'process', 'Process'):
-            self.process()
-        else:
-            print('Bye!')
-    
-    def process(self):        
-        for d in os.listdir():
-            if 'k2c' in d:
-                if os.listdir(d + '/k2fits/') == []:
-                    print('Must download FITS files first!')
-                elif os.listdir(d + '/data/') == []:
-                        filelist = os.listdir(d + '/k2fits')
-                        print('Processing Campaign ' + d.lstrip('k2c') + '...')
-                        '''
-                        for f in filelist:
-                            print(d + '/k2fits/' + f)
-                            ObjectID(d + '/k2fits/' + f)
-                        '''
-                        print('Finished Campaign ' + d.lstrip('k2c'))
+        main = '= Menu =\n1) Download\n2) Process\n3) Exit\n\nSelect an option: '
+        while True:
+            option = input(main)
+            
+            if option in ('1', 'download', 'Download', 'DOWNLOAD'):
+                dtext =  '''\n= Download =
+Possible arguments:
+- If a single campaign is to be downloaded, enter the number of that campaign.
+- If inputing multiple campaigns, seperate the numbers with only a space.
+  (eg: 1 4 10 12)
+- To download all campaigns, enter "all". (Will take a long time!)
+
+Enter campaign(s) to be downloaded: '''
+                
+                campaign = input(dtext)
+                
+                if campaign in ('all', 'All', 'ALL'):
+                    for c in os.listdir():
+                        if 'k2c' in c:
+                            print('Downloading Campaign ' + campaign.lstrip('k2c') + '...')
+                            subprocess.run('epic-catalog/'+ campaign)
+                elif len(campaign) > 2:
+                    campaign = campaign.split()
+                    for c in campaign:
+                        print('Downloading Campaign ' + campaign + '...')
+                        subprocess.run('epic-catalog'+'/k2c' + campaign)
                 else:
-                    print('Campaign ' + d.lstrip('k2c') + ' already processed!')
+                    print('Downloading Campaign ' + campaign + '...')
+                    subprocess.run('epic-catalog'+'/k2c' + campaign)
+            
+            elif option in ('2', 'process', 'Process', 'PROCESS'):
+                ptext = '''\n= Process =
+Possible arguments:
+- If a single campaign is to be processed, enter the number of that campaign.
+- If inputing multiple campaigns, seperate the numbers with only a space.
+  (eg: 1 4 10 12)
+- To process all campaigns, enter "all".(Will take a long time!)
+
+Enter campaign(s) to be processed: '''
+                campaign = input(ptext)
+                
+                if campaign in ('all', 'All', 'ALL'):
+                    for c in os.listdir():
+                        if 'k2c' in c:
+                            self.process(c.lstrip('k2c'))
+                elif len(campaign) > 2:
+                    campaign = campaign.split()
+                    for c in campaign:
+                        self.process(c)
+                else:
+                    self.process(campaign)
+                createnpz.stardic()
+                
+            else:
+                print('Exiting...\nBye!')
+                break
+    
+    def process(self, campaign):
+        if os.listdir('k2c' + str(campaign) + '/k2fits/') == []:
+            print('Must download FITS files for Campaign ' + str(campaign) +' first!')
+        elif os.listdir('k2c' + str(campaign) + '/data/') == []:
+                filelist = os.listdir('k2c' + str(campaign) + '/k2fits')
+                print('Processing Campaign ' + str(campaign) + '...')
+                for f in filelist:
+                    print(d + '/k2fits/' + f)
+                    '''
+                    ObjectID(d + '/k2fits/' + f)
+                    '''
+                print('Finished Campaign ' + str(campaign))
+        else:
+            print('Campaign ' + str(campaign) + ' already processed!')
         
 
 class ObjectID(object):
@@ -225,14 +273,8 @@ class ObjectID(object):
         binthduamp = fits.BinTableHDU.from_columns(coldefsamp)
         binthduamp.name = 'SPECTRUM'
         
-        # Fix flags here? Need to get to work!
-        
-        '''coldefsflag = fits.ColDefs([colflag])
-        binthduflag = fits.BinTableHDU.from_columns(coldefsflag)
-        binthduflag.name = 'FLAG HIST'''
-        
         hdul = fits.HDUList([phdu, binthdudata, binthduamp])#, binthduflag]) # Creates an HDUList from the PrimaryHDU and BinTableHDU
         hdul.writeto(directory + str(self.EPIC) + '.fits') # Writes to assigned directory with object's EPIC ID
 
 #test1 = ObjectID('k2c4/k2fits/testlc1.fits')
-manager = CampaignManager()
+CampaignManager()

@@ -22,7 +22,7 @@ import PyPDF2 as pypdf2
 
 # == Functions & Global Variables == #
 
-parameters = np.load('tnldict.npz')
+parameters = np.load('etc/tnldict.npz')
 stars = parameters['stars']
 vals = list(map(list, zip( parameters['teff'], parameters['logg'], parameters['flag'] )))
 

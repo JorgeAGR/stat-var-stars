@@ -2,7 +2,7 @@
 
 #blabla
 
-cd k2fits/
+cd k2c10/k2fits/
 
 wget -q -nH --cut-dirs=6 -r -l0 -c -N -np -R 'index*' -erobots=off http://archive.stsci.edu/pub/k2/lightcurves/c102/201000000/71000/ktwo201071997-c102_llc.fits
 wget -q -nH --cut-dirs=6 -r -l0 -c -N -np -R 'index*' -erobots=off http://archive.stsci.edu/pub/k2/lightcurves/c102/201000000/73000/ktwo201073867-c102_llc.fits
