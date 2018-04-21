@@ -2,6 +2,8 @@
 
 #blabla
 
+cd k2fits/
+
 wget -q -nH --cut-dirs=6 -r -l0 -c -N -np -R 'index*' -erobots=off http://archive.stsci.edu/pub/k2/lightcurves/c12/206300000/74000/ktwo206374325-c12_llc.fits
 wget -q -nH --cut-dirs=6 -r -l0 -c -N -np -R 'index*' -erobots=off http://archive.stsci.edu/pub/k2/lightcurves/c12/206300000/76000/ktwo206376125-c12_llc.fits
 wget -q -nH --cut-dirs=6 -r -l0 -c -N -np -R 'index*' -erobots=off http://archive.stsci.edu/pub/k2/lightcurves/c12/206300000/80000/ktwo206380015-c12_llc.fits

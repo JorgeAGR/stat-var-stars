@@ -31,31 +31,22 @@ class CampaignManager(object):
         else:
             print('Bye!')
     
-    def process(self):
-        while True:
-            try:
-                campaign = input('Enter campaign to process: ')
-                int(campaign)
-                break
-            except:
-                if campaign in ('q','Q','quit','QUIT','Quit'):
-                    print('Bye!')
-                    return
+    def process(self):        
+        for d in os.listdir():
+            if 'k2c' in d:
+                if os.listdir(d + '/k2fits/') == []:
+                    print('Must download FITS files first!')
+                elif os.listdir(d + '/data/') == []:
+                        filelist = os.listdir(d + '/k2fits')
+                        print('Processing Campaign ' + d.lstrip('k2c') + '...')
+                        '''
+                        for f in filelist:
+                            print(d + '/k2fits/' + f)
+                            ObjectID(d + '/k2fits/' + f)
+                        '''
+                        print('Finished Campaign ' + d.lstrip('k2c'))
                 else:
-                    pass
-        
-        directory = 'k2c' + campaign + '/k2fits/'
-        filelist = os.listdir(directory)
-        
-        for f in filelist:
-            print(directory+f)
-            ObjectID(directory+f)
-        print('Done!')
-        repeat = input('Do another campaign?: ')
-        if repeat in ('y','Y','yes','Yes','YES'):
-            self.process(self)
-        else:
-            self.main()
+                    print('Campaign ' + d.lstrip('k2c') + ' already processed!')
         
 
 class ObjectID(object):

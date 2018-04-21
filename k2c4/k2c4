@@ -2,6 +2,8 @@
 
 #Download lightcurve data from K2 Campaign 4, Guzik (GO4048)
 
+cd k2fits/
+
 wget -q -nH --cut-dirs=6 -r -l0 -c -N -np -R 'index*' -erobots=off http://archive.stsci.edu/pub/k2/lightcurves/c4/210300000/59000/ktwo210359769-c04_llc.fits
 wget -q -nH --cut-dirs=6 -r -l0 -c -N -np -R 'index*' -erobots=off http://archive.stsci.edu/pub/k2/lightcurves/c4/210300000/84000/ktwo210384590-c04_llc.fits
 wget -q -nH --cut-dirs=6 -r -l0 -c -N -np -R 'index*' -erobots=off http://archive.stsci.edu/pub/k2/lightcurves/c4/210500000/17000/ktwo210517342-c04_llc.fits
