@@ -24,7 +24,7 @@ class CampaignManager(object):
     
     def main(self):
         
-        main = '= Menu =\n1) Download\n2) Process\n3) Exit\n\nSelect an option: '
+        main = '\n= Menu =\n1) Download\n2) Process\n3) Exit\n\nSelect an option: '
         while True:
             option = input(main)
             
@@ -43,16 +43,25 @@ Enter campaign(s) to be downloaded: '''
                 if campaign in ('all', 'All', 'ALL'):
                     for c in os.listdir():
                         if 'k2c' in c:
-                            print('Downloading Campaign ' + campaign.lstrip('k2c') + '...')
-                            subprocess.run('epic-catalog/'+ campaign)
+                            if os.listdir(c + '/k2fits/') == []:
+                                print('Downloading Campaign ' + campaign.lstrip('k2c') + '...')
+                                subprocess.run('epic-catalog/'+ campaign)
+                            else:
+                                print('Campaign ' + campaign.lstrip('k2c') + ' already downloaded!')
                 elif len(campaign) > 2:
                     campaign = campaign.split()
                     for c in campaign:
+                        if os.listdir('k2c' + c + '/k2fits/') == []:
+                            print('Downloading Campaign ' + c + '...')
+                            subprocess.run('epic-catalog'+'/k2c' + c)
+                        else:
+                            print('Campaign ' + c + ' already downloaded!')
+                else:
+                    if os.listdir('k2c' + campaign + '/k2fits/') == []:
                         print('Downloading Campaign ' + campaign + '...')
                         subprocess.run('epic-catalog'+'/k2c' + campaign)
-                else:
-                    print('Downloading Campaign ' + campaign + '...')
-                    subprocess.run('epic-catalog'+'/k2c' + campaign)
+                    else:
+                        print('Campaign ' + campaign + ' already downloaded!')
             
             elif option in ('2', 'process', 'Process', 'PROCESS'):
                 ptext = '''\n= Process =
@@ -89,9 +98,7 @@ Enter campaign(s) to be processed: '''
                 print('Processing Campaign ' + str(campaign) + '...')
                 for f in filelist:
                     print(d + '/k2fits/' + f)
-                    '''
                     ObjectID(d + '/k2fits/' + f)
-                    '''
                 print('Finished Campaign ' + str(campaign))
         else:
             print('Campaign ' + str(campaign) + ' already processed!')
