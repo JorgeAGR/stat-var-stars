@@ -31,11 +31,15 @@ class CampaignManager(object):
                 subprocess.call(['mkdir', 'k2c' + c + '/flags'])
                 subprocess.call(['mkdir', 'k2c' + c + '/k2fits'])
                 
+        dl = False
         for c in opts['catalogs']:
             catalog = 'epic-catalog/epic_' + c + '_27Feb2018.txt'
             if not os.path.isfile(catalog):
-                print('Downloading EPIC Catalog...')
-                subprocess.run('epic-catalog/epic_ctlg_dl')
+                dl = True
+                break
+        if dl:
+            print('Downloading EPIC Catalog...')
+            subprocess.run('epic-catalog/epic_ctlg_dl')
         
         print('\nDeveloped by: Jorge A. Garcia @ New Mexico State University')
         
