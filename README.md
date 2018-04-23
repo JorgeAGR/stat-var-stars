@@ -7,16 +7,16 @@ The scripts were written in Ubuntu (Debian-based) Linux. They should work for an
 
 
 Python 3.x, along with the follwoing libraries:
--- Matplotlib
--- Numpy
--- Scipy
--- Astropy
--- Tkinter
--- PyPDF2
+- Matplotlib
+- Numpy
+- Scipy
+- Astropy
+- Tkinter
+- PyPDF2
 
--The best option is to download the Anaconda Python distribution: https://www.anaconda.com/download/#linux
--- This distribution will contain most of the necessary libraries, with only PyPDF2 missing.
-   Simply run the following command to download:  "sudo pip install pypdf2"
+The best option is to download the Anaconda Python distribution: https://www.anaconda.com/download/#linux
+- This distribution will contain most of the necessary libraries, with only PyPDF2 missing.
+  Simply run the following command to download:  "sudo pip install pypdf2"
 
 ----------------------------------------------------------------------------------------------------------------------------
 
@@ -39,7 +39,6 @@ Manipulates the previously downloaded files by:
 - Searches for physical metadata on the target in the EPIC catalog.
 - Performs calculations such as putting the lightcurve in ppm and calculating the amplitude spectrum.
 - Saves everything into a new FITS file for convenience.
-
 
 == data_visualpy ==
 
@@ -76,6 +75,6 @@ This menu contains the same options as Histograms & Plots, but these are for the
 After inputting the desired search parameters, pressing the Search button will update the filelist box with targets that fulfill the requirements.
 
 Some details to keep in mind:
--- Currently, searching for more than two flags is not functional. Only searching for both Temperature and Surface Gravity ranges are allowed.
--- In order to refresh the list of targets from the established filters, reselection of the Campaign is needed.
+- Currently, searching for more than two flags is not functional. Only searching for both Temperature and Surface Gravity ranges are allowed.
+- In order to refresh the list of targets from the established filters, reselection of the Campaign is needed.
 
