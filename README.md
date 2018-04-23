@@ -29,9 +29,11 @@ This script is what manages the K2 data. It will ensure the necesary directories
 The main 2 commands are:
 
 = Download =
+
 Allows the user to download the FITS files for the targets of each campaign.
 
 = Process =
+
 Manipulates the previously downloaded files by:
 - Exctracts lightcurves and times of observation, as well as some observational metadata from the FITS file.
 - Searches for physical metadata on the target in the EPIC catalog.
@@ -44,6 +46,7 @@ Manipulates the previously downloaded files by:
 This script launches the GUI interface used to view/flag data. Some notes about its functionality:
 
 = Flagging =
+
 In order to flag the currently selected dataset, pressing the corresping key on the keyboard will flag it appropriately:
 - d : Delta Scuti Candidate
 - g : Gamma Dor Candidate
@@ -54,18 +57,22 @@ In order to flag the currently selected dataset, pressing the corresping key on 
 - j : Unprocessed Data/Noise
 
 = File Menu =
+
 - Save As PDF -
 This will save everything in the filelist (The box where the target file is selected). Not recommended to use when an entire campaign is displayed. Recommended to refine the box listing with Search parameters.
 
 After creating the PDF, it will be saved in the main directory as 'k2mission.pdf'. Say if this file contained only Delta Scuti stars, it's recommended to rename it and save it elsewhere, since the app creates and appends to the 'k2mission.pdf' file by default.
 
 = Histograms & Plots =
+
 The options in these menus will open a new menu, showing the selected graph for the currently selected campaign in a new window
 
 = Mission =
+
 This menu contains the same options as Histograms & Plots, but these are for the entire mission (includes all processed campaigns)
 
 = Searching =
+
 After inputting the desired search parameters, pressing the Search button will update the filelist box with targets that fulfill the requirements.
 
 Some details to keep in mind:
