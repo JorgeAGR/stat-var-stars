@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# This script downloads the EPIC catalog if missing
+
+cd epic-catalog/
+
+echo 'Downloading EPIC Catalog 1/6...'
+wget -q --show-progress -c -N https://archive.stsci.edu/missions/k2/catalogs/epic_1_27Feb2018.txt.gz
+echo 'Exctracting EPIC Catalog 1/6...'
+gunzip epic_1_27Feb2018.txt.gz
+
+echo 'Downloading EPIC Catalog 2/6...'
+wget -q --show-progress -c -N https://archive.stsci.edu/missions/k2/catalogs/epic_2_27Feb2018.txt.gz
+echo 'Exctracting EPIC Catalog 2/6...'
+gunzip epic_2_27Feb2018.txt.gz
+
+echo 'Downloading EPIC Catalog 3/6...'
+wget -q --show-progress -c -N https://archive.stsci.edu/missions/k2/catalogs/epic_3_27Feb2018.txt.gz
+echo 'Exctracting EPIC Catalog 3/6...'
+gunzip epic_3_27Feb2018.txt.gz
+
+echo 'Downloading EPIC Catalog 4/6...'
+wget -q --show-progress -c -N https://archive.stsci.edu/missions/k2/catalogs/epic_4_27Feb2018.txt.gz
+echo 'Exctracting EPIC Catalog 4/6...'
+gunzip epic_4_27Feb2018.txt.gz
+
+echo 'Downloading EPIC Catalog 5/6...'
+wget -q --show-progress -c -N https://archive.stsci.edu/missions/k2/catalogs/epic_5_27Feb2018.txt.gz
+echo 'Exctracting EPIC Catalog 5/6...'
+gunzip epic_5_27Feb2018.txt.gz
+
+echo 'Downloading EPIC Catalog 6/6...'
+wget -q --show-progress -c -N https://archive.stsci.edu/missions/k2/catalogs/epic_6_27Feb2018.txt.gz
+echo 'Exctracting EPIC Catalog 6/6...'
+gunzip epic_6_27Feb2018.txt.gz

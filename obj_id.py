@@ -17,6 +17,25 @@ import createnpz
 class CampaignManager(object):
      
     def __init__(self):
+        with open('etc/config.txt', 'r') as config:
+            opts = tuple(csv.reader(config, delimiter = ',', quoting = csv.QUOTE_MINIMAL))
+            opts = dict( zip( [opts[i][0] for i in range(len(opts))] , [opts[i][1:] for i in range(len(opts))] ))
+
+        for c in opts['campaigns']:
+            folder = 'k2c' + c
+            if not os.path.isdir(folder):
+                print('Making directories for Campaign ' + c)
+                subprocess.call(['mkdir', 'k2c' + c])
+                subprocess.call(['mkdir', 'k2c' + c + '/csv'])
+                subprocess.call(['mkdir', 'k2c' + c + '/data'])
+                subprocess.call(['mkdir', 'k2c' + c + '/flags'])
+                subprocess.call(['mkdir', 'k2c' + c + '/k2fits'])
+                
+        for c in opts['catalogs']:
+            catalog = 'epic-catalog/epic_' + c + '_27Feb2018.txt'
+            if not os.path.isfile(catalog):
+                print('Downloading EPIC Catalog...')
+                subprocess.run('epic-catalog/epic_ctlg_dl')
         
         print('\nDeveloped by: Jorge A. Garcia @ New Mexico State University')
         
@@ -97,8 +116,8 @@ Enter campaign(s) to be processed: '''
                 filelist = os.listdir('k2c' + str(campaign) + '/k2fits')
                 print('Processing Campaign ' + str(campaign) + '...')
                 for f in filelist:
-                    print(d + '/k2fits/' + f)
-                    ObjectID(d + '/k2fits/' + f)
+                    print('k2c' + str(campaign) + '/k2fits/' + f)
+                    ObjectID('k2c' + str(campaign) + '/k2fits/' + f)
                 print('Finished Campaign ' + str(campaign))
         else:
             print('Campaign ' + str(campaign) + ' already processed!')
@@ -146,17 +165,17 @@ class ObjectID(object):
     
     def searchEpic(self):
         if 210000000 >= self.EPIC >= 201000001:
-            filename = 'epic_1_19Dec2017.txt'
+            filename = 'epic_1_27Feb2018.txt'
         elif 220000000 >= self.EPIC >= 210000001:
-            filename = 'epic_2_19Dec2017.txt'
+            filename = 'epic_2_27Feb2018.txt'
         elif 230000000 >= self.EPIC >= 220000001:
-            filename = 'epic_3_19Dec2017.txt'
+            filename = 'epic_3_27Feb2018.txt'
         elif 240000000 >= self.EPIC >= 230000001:
-            filename = 'epic_4_19Dec2017.txt'
+            filename = 'epic_4_27Feb2018.txt'
         elif 250000000 >= self.EPIC >= 240000001:
-            filename = 'epic_5_19Dec2017.txt'
+            filename = 'epic_5_27Feb2018.txt'
         elif 251809654 >= self.EPIC >= 250000001:
-            filename = 'epic_6_19Dec2017.txt'
+            filename = 'epic_6_27Feb2018.txt'
         
         with open('epic-catalog/' + filename) as file:
             for line in file:
@@ -283,5 +302,4 @@ class ObjectID(object):
         hdul = fits.HDUList([phdu, binthdudata, binthduamp])#, binthduflag]) # Creates an HDUList from the PrimaryHDU and BinTableHDU
         hdul.writeto(directory + str(self.EPIC) + '.fits') # Writes to assigned directory with object's EPIC ID
 
-#test1 = ObjectID('k2c4/k2fits/testlc1.fits')
 CampaignManager()

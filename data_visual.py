@@ -112,18 +112,18 @@ class PlotCanvas(tk.Frame):
     def __init__(self,parent):
         
         tk.Frame.__init__(self,parent)
-        '''
+        
         self.f, self.ax = plt.subplots()
         
         self.canvas = FigureCanvasTkAgg(self.f, self)
         self.canvas.draw()
         self.canvas.get_tk_widget().pack(side=tk.RIGHT,fill=tk.BOTH,expand=True)
-        '''
+        
         #Displays Matplotlib figure toolbar.
         #self.toolbar = NavigationToolbar2TkAgg(self.canvas, self)
         #self.toolbar.update()
         #self.canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-        
+        '''
         self.flc, self.axlc = plt.subplots()
         
         self.canvaslc = FigureCanvasTkAgg(self.flc, self)
@@ -135,7 +135,7 @@ class PlotCanvas(tk.Frame):
         self.canvasas = FigureCanvasTkAgg(self.fas, self)
         self.canvasas.draw()
         self.canvasas.get_tk_widget().pack(fill = tk.BOTH, expand = True)
-        
+        '''
 
 class Menu(tk.Frame):
     
@@ -165,9 +165,9 @@ class Menu(tk.Frame):
         
     def readCampaigns(self):
         with open('etc/config.txt') as config:
-            read = csv.reader(config, delimiter = '|')
+            read = csv.reader(config, delimiter = ',')
             for line in read:
-                if 'campaigns available' in line:
+                if 'campaigns' in line:
                     self.campaigns = []
                     self.campaign_nums = []
                     for i in range(1,len(line)):
@@ -375,10 +375,11 @@ class MainApp(tk.Tk):
         #plots.grid(row = 0, column = 0, sticky = 'NEWS')
         plots.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
         
+        '''
         self.Canvas = PlotCanvas(plots)
         self.Canvas.pack(expand = True, fill = tk.BOTH)
-        
         '''
+        
         self.CanvasLC = PlotCanvas(plots)
         #self.CanvasLC.grid(row = 0, column = 0, sticky = 'NEWS')
         self.CanvasLC.pack(expand = True, fill = tk.BOTH)
@@ -386,8 +387,6 @@ class MainApp(tk.Tk):
         self.CanvasA_LS = PlotCanvas(plots)
         #self.CanvasA_LS.grid(row = 1, column = 0, sticky = 'NEWS')
         self.CanvasA_LS.pack(expand = True, fill = tk.BOTH)
-        '''
-        
         
         
         sidebar = tk.Frame(self)
@@ -541,20 +540,19 @@ class MainApp(tk.Tk):
         
         time = time - time[0]
         
-        #self.CanvasLC.ax.clear()
-        self.Canvas.axlc.clear()
+        self.CanvasLC.ax.clear()
+        #self.Canvas.axlc.clear()
         plt.figure(1)
         #self.CanvasLC.ax.
         plt.plot(time, lc, linewidth = 1)
-        #self.CanvasLC.ax.set_xticks(np.arange(min(time), max(time)+1,10000))
         plt.title('Object ID: ' + str(self.obj.cards['EPIC']) + '   Type: ' + flag2label(int(flag)), fontsize = 14)
         plt.xlabel('Time $(d)$')
         plt.ylabel('Amplitude $(ppm)$')
         plt.ticklabel_format(style = 'sci', scilimits = (0,0), axis = 'y', useMathText = False)
-        #self.CanvasLC.ax.xaxis.set_major_locator(MultipleLocator(10))
-        #self.CanvasLC.ax.xaxis.set_minor_locator(MultipleLocator(2))
-        self.Canvas.axlc.xaxis.set_major_locator(MultipleLocator(10))
-        self.Canvas.axlc.xaxis.set_minor_locator(MultipleLocator(2))
+        self.CanvasLC.ax.xaxis.set_major_locator(MultipleLocator(10))
+        self.CanvasLC.ax.xaxis.set_minor_locator(MultipleLocator(2))
+        #self.Canvas.axlc.xaxis.set_major_locator(MultipleLocator(10))
+        #self.Canvas.axlc.xaxis.set_minor_locator(MultipleLocator(2))
         plt.grid()
         
         if self.LCTools.maxx.get() and self.LCTools.minx.get():
@@ -571,8 +569,8 @@ class MainApp(tk.Tk):
         else:
             None#plt.ylim(-2*(np.std(lc)),2*np.std(lc))
         
-        #self.CanvasA_LS.ax.clear()
-        self.Canvas.axas.clear()
+        self.CanvasA_LS.ax.clear()
+        #self.Canvas.axas.clear()
         plt.figure(2)
         #self.CanvasA_LS.ax.
         plt.plot(freq, als, linewidth = 1)
@@ -592,21 +590,21 @@ class MainApp(tk.Tk):
             asmaxx = float(self.ASTools.maxx.get())
             asminx = float(self.ASTools.minx.get())
             plt.xlim(asminx,asmaxx)
-            #self.CanvasA_LS.ax.xaxis.set_major_locator(MultipleLocator(asmaxx/4))
-            #self.CanvasA_LS.ax.xaxis.set_minor_locator(MultipleLocator(asmaxx/8))
-            self.Canvas.axas.xaxis.set_major_locator(MultipleLocator(asmaxx/4))
-            self.Canvas.axas.xaxis.set_minor_locator(MultipleLocator(asmaxx/8))
+            self.CanvasA_LS.ax.xaxis.set_major_locator(MultipleLocator(asmaxx/4))
+            self.CanvasA_LS.ax.xaxis.set_minor_locator(MultipleLocator(asmaxx/8))
+            #self.Canvas.axas.xaxis.set_major_locator(MultipleLocator(asmaxx/4))
+            #self.Canvas.axas.xaxis.set_minor_locator(MultipleLocator(asmaxx/8))
         else:
             plt.xlim(0,freq[-1])
-            #self.CanvasA_LS.ax.xaxis.set_major_locator(MultipleLocator(2.5))
-            #self.CanvasA_LS.ax.xaxis.set_minor_locator(MultipleLocator(0.5))
-            self.Canvas.axas.xaxis.set_major_locator(MultipleLocator(2.5))
-            self.Canvas.axas.xaxis.set_minor_locator(MultipleLocator(0.5))
+            self.CanvasA_LS.ax.xaxis.set_major_locator(MultipleLocator(2.5))
+            self.CanvasA_LS.ax.xaxis.set_minor_locator(MultipleLocator(0.5))
+            #self.Canvas.axas.xaxis.set_major_locator(MultipleLocator(2.5))
+            #self.Canvas.axas.xaxis.set_minor_locator(MultipleLocator(0.5))
         
-        #self.CanvasLC.f.canvas.draw()
-        #self.CanvasA_LS.f.canvas.draw()
-        self.Canvas.flc.canvas.draw()
-        self.Canvas.fas.canvas.draw()
+        self.CanvasLC.f.canvas.draw()
+        self.CanvasA_LS.f.canvas.draw()
+        #self.Canvas.flc.canvas.draw()
+        #self.Canvas.fas.canvas.draw()
     
     def temphist(self):
         self.histogram('TEFF', False)
