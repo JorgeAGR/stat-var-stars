@@ -65,7 +65,7 @@ def stardic():
     for i in campaigns:
         directory = 'k2c' + str(i) + '/data/'
         f = os.listdir(directory)
-        print(str(len(f)) + ' files in Campaign ' + str(i))
+        print(str(len(f)) + ' stars in Campaign ' + str(i))
         for file in f:
             filedir = 'k2c'+ str(i) + '/data/' + file
             flagdir = 'k2c' + str(i) + '/flags/' + file[0:9] + '.txt'
@@ -75,6 +75,7 @@ def stardic():
             logg = np.append(logg, obj.cards['LOGG'])
             flag = np.append(flag, int(obj.FLAGS[-1]))
     
-    np.savez('etc/tnldict.npz', stars = stars, teff = teff, logg = logg, flag = flag)
+    np.savez('etc/tnldict.npz', stars = stars, teff = teff, logg = logg)
+    np.save('etc/flagarray.npy', flag)
     
     print('Starlist updated!')

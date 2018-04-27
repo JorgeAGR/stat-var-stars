@@ -23,8 +23,9 @@ import PyPDF2 as pypdf2
 # == Functions & Global Variables == #
 
 parameters = np.load('etc/tnldict.npz')
+flags = np.load('etc/flagarray.npy')
 stars = parameters['stars']
-vals = list(map(list, zip( parameters['teff'], parameters['logg'], parameters['flag'] )))
+vals = list(map(list, zip( parameters['teff'], parameters['logg'], flags)))#parameters['flag'] )))
 
 starlist = dict(zip(stars,vals))
 
@@ -878,4 +879,10 @@ class MainApp(tk.Tk):
                     page.write('k2data.pdf')
         
 app = MainApp()
-app.mainloop()        
+app.mainloop()
+
+newflags = np.array([])
+for star in starlist:
+    newflags = np.append(newflags, starlist[star][2])
+
+np.save('etc/flagarray.npy', newflags)
