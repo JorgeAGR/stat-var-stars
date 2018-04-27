@@ -51,7 +51,6 @@ def stardic():
     
     print('Updating Starlist...')
     
-    
     campaigns = []
     for d in os.listdir():
             if 'k2c' in d:
@@ -76,6 +75,6 @@ def stardic():
             logg = np.append(logg, obj.cards['LOGG'])
             flag = np.append(flag, int(obj.FLAGS[-1]))
     
-    np.savez('tnldict.npz', stars = stars, teff = teff, logg = logg, flag = flag)
+    np.savez('etc/tnldict.npz', stars = stars, teff = teff, logg = logg, flag = flag)
     
     print('Starlist updated!')

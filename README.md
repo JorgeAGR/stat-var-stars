@@ -41,7 +41,7 @@ Manipulates the previously downloaded files by:
 - Performs calculations such as putting the lightcurve in ppm and calculating the amplitude spectrum.
 - Saves everything into a new FITS file for convenience.
 
-#### data_visualpy
+### data_visual.py
 
 This script launches the GUI interface used to view/flag data. Some notes about its functionality:
 

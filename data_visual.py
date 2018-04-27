@@ -249,6 +249,10 @@ class SearchTools(tk.LabelFrame):
         self.bincheck = tk.Checkbutton(types, text = 'Binary' , variable = self.binvar)
         self.bincheck.grid(row = 1, column = 0, sticky = 'W')
         
+        self.dghybvar = tk.BooleanVar()
+        self.dghybcheck = tk.Checkbutton(types, text = r'D/G Hybrid', variable = self.dghybvar)
+        self.dghybcheck.grid(row = 1, column = 1, sticky = 'W')
+        
         self.searchbutton = tk.Button(self, text = 'Search', command = command)
         self.searchbutton.grid(row = 3)
 
@@ -296,6 +300,14 @@ class PlotTools(tk.LabelFrame):
         self.maxrangex.delete(0,tk.END)
         self.minrangey.delete(0,tk.END)
         self.maxrangey.delete(0,tk.END)
+    
+    def percentbox(self):
+        tk.Label(self, text = '% Max Amp').grid(row = 3, column = 1)
+        self.percent = tk.IntVar()
+        self.percent.set(60)
+        self.percentagebox = tk.Spinbox(self, from_ = 10, to = 100,
+                                        increment = 10, width = 4, textvariable = self.percent)
+        self.percentagebox.grid(row = 3, column = 2)
         
 class Display(tk.LabelFrame): #WORK ON THIS
     
@@ -335,6 +347,14 @@ class Window(tk.Toplevel):
         
         self.canvas = PlotCanvas(self)
         self.canvas.pack(fill=tk.BOTH, expand=True)
+
+class EntryPopUp(tk.Toplevel):
+    
+    def __init__(self):
+        
+        tk.Toplevel.__init__(self)
+        
+        self.title()
 
 # == Main Class == #
     
@@ -405,6 +425,7 @@ class MainApp(tk.Tk):
         
         self.ASTools = PlotTools(sidebar, 'Amplitude Spectrum')
         self.ASTools.grid(row = 3, sticky = 'NS', pady = 5)
+        self.ASTools.percentbox()
         
         self.plotupdate = tk.Button(sidebar, text = 'Update', command = self.updatePlot)#, command = self.updatePlot)
         self.plotupdate.grid(row = 4, pady = 5)
@@ -455,13 +476,14 @@ class MainApp(tk.Tk):
         dsct = self.SearchTools.dsctvar.get()
         gdor = self.SearchTools.gdorvar.get()
         binary = self.SearchTools.binvar.get()
+        hybrid = self.SearchTools.dghybvar.get()
         
         minteff = str2float(minteff, True)
         maxteff = str2float(maxteff, False)
         minlogg = str2float(minlogg, True)
         maxlogg = str2float(maxlogg, False)
         
-        allowed = [get(dsct,1), get(gdor,2), get(binary, 4)]
+        allowed = [get(dsct, 1), get(gdor, 2), get(hybrid, 3), get(binary, 4)]
         
         rm = []
         
@@ -501,7 +523,7 @@ class MainApp(tk.Tk):
         elif event.keysym == 'g':
             self.updateFlag(2) # Gamma Doradus Candidate
         elif event.keysym == 'h':
-            self.updateFlag(3) # Dela Sct/ Gamma Dor Hybrid
+            self.updateFlag(3) # Delta Sct/Gamma Dor Hybrid
         elif event.keysym == 'b':
             self.updateFlag(4) # Binary
         elif event.keysym == 's':
@@ -539,6 +561,7 @@ class MainApp(tk.Tk):
         flag = self.obj.FLAGS[-1]
         
         time = time - time[0]
+        aspercent = self.ASTools.percent.get() / 100
         
         self.CanvasLC.ax.clear()
         #self.Canvas.axlc.clear()
@@ -580,7 +603,7 @@ class MainApp(tk.Tk):
         plt.axvline(x = 4.075*3, linestyle = ':', color = 'red')
         plt.axvline(x = 4.075*4, linestyle = ':', color = 'red')
         plt.axvline(x = 4.075*5, linestyle = ':', color = 'red')
-        plt.ylim(0,None)
+        plt.title('Displaying ' + str(aspercent * 100) + '% of Max Amplitude')
         plt.xlabel('Cycles per Day $(1/d)$')
         plt.ylabel('Amplitude $(ppm)$')
         plt.ticklabel_format(style = 'sci', scilimits = (0,0), axis = 'y', useMathText = False)
@@ -600,6 +623,13 @@ class MainApp(tk.Tk):
             self.CanvasA_LS.ax.xaxis.set_minor_locator(MultipleLocator(0.5))
             #self.Canvas.axas.xaxis.set_major_locator(MultipleLocator(2.5))
             #self.Canvas.axas.xaxis.set_minor_locator(MultipleLocator(0.5))
+        
+        if self.ASTools.maxy.get() and self.ASTools.miny.get():
+            asmaxy = float(self.ASTools.maxy.get())
+            asminy = float(self.ASTools.miny.get())
+            plt.ylim(asminy, asmaxy)
+        else:
+            plt.ylim(0, max(als) * aspercent)
         
         self.CanvasLC.f.canvas.draw()
         self.CanvasA_LS.f.canvas.draw()
@@ -721,6 +751,8 @@ class MainApp(tk.Tk):
             als = self.obj.cards['AMP_LOMBSCARG']
             flag = self.obj.FLAGS[-1]
             
+            aspercent = self.ASTools.percent.get() / 100
+            
             time = time - time[0]
             
             ax0.plot(time, lc, linewidth = 1)
@@ -756,6 +788,7 @@ class MainApp(tk.Tk):
             ax1.axvline(x = 4.075*4, linestyle = ':', color = 'red')
             ax1.axvline(x = 4.075*5, linestyle = ':', color = 'red')
             ax1.set_ylim(0,None)
+            ax1.set_title('Displaying ' + str(aspercent * 100) + '% of Max Amplitude', fontsize = 10)
             ax1.set_xlabel('Cycles per Day $(1/d)$', fontsize = 10)
             ax1.set_ylabel('Amplitude $(ppm)$', fontsize = 10)
             ax1.ticklabel_format(style = 'sci', scilimits = (0,0), axis = 'y', useMathText = False)
@@ -771,8 +804,15 @@ class MainApp(tk.Tk):
                 self.Canvas.axas.xaxis.set_minor_locator(MultipleLocator(asmaxx/8))
             else:
                 ax1.set_xlim(0,freq[-1])
-                self.Canvas.axas.xaxis.set_major_locator(MultipleLocator(2.5))
-                self.Canvas.axas.xaxis.set_minor_locator(MultipleLocator(0.5))
+                ax1.xaxis.set_major_locator(MultipleLocator(2.5))
+                ax1.xaxis.set_minor_locator(MultipleLocator(0.5))
+            
+            if self.ASTools.maxy.get() and self.ASTools.miny.get():
+                asmaxy = float(self.ASTools.maxy.get())
+                asminy = float(self.ASTools.miny.get())
+                ax1.set_ylim(asminy, asmaxy)
+            else:
+                ax1.set_ylim(0, max(als) * aspercent)
             
             i = 0
             x1 = x2 = 0.075
@@ -803,6 +843,7 @@ class MainApp(tk.Tk):
                         x2 = 0.075
                         skip2 = 0
                 else:
+                    
                     text = valuetitle + ': ' + str(self.obj.cards[valuetitle])
                     plt.figtext(x1, y1, text, horizontalalignment='left',
                         fontsize=10, multialignment='left')

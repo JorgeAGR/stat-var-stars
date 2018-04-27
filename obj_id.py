@@ -213,9 +213,9 @@ class ObjectID(object):
                     break
     
     def processData(self):
-        def frequency_grid(time, oversampling):
+        def frequency_grid(time, samples, oversampling):
             period = time[-1] - time[0]
-            dt = period / len(time)
+            dt = period / samples
             df = 1/period/oversampling
             fmax = 1/(2*dt)
             fmin = df
@@ -227,11 +227,13 @@ class ObjectID(object):
             bjdrefi = hdul[1].header['BJDREFI']
             bjdreff = hdul[1].header['BJDREFF']
         
+        samples = len(self.TIME)
+        
         self.TIME = self.TIME[~np.isnan(self.LC)] # Time
         self.E_LC = self.LC[~np.isnan(self.LC)] # Lightcurve
         self.LC = self.LC[~np.isnan(self.LC)] # Lightcurve
         
-                #Jackiewicz  2011
+        #Jackiewicz  2011
         bad = np.where(np.std(np.diff(self.LC))*5 < np.abs(np.diff(self.LC)))
         mean = np.mean(self.LC)
         indy = []
@@ -248,7 +250,7 @@ class ObjectID(object):
         self.LC = (self.LC/mean - 1) * 10**6
         # How to turn E_LC into ppm???
         
-        self.FREQS, omegas = frequency_grid(self.TIME, 1)
+        self.FREQS, omegas = frequency_grid(self.TIME, samples, 1)
         #P_LS = lomb_scargle(self.TIME, self.LC, self.E_LC, omegas)
         P_LS = lombscargle(self.TIME, self.LC, omegas)
         self.A_LS = np.sqrt(4*P_LS / len(self.LC))
