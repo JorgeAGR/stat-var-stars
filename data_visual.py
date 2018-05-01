@@ -119,11 +119,12 @@ class PlotCanvas(tk.Frame):
         self.canvas = FigureCanvasTkAgg(self.f, self)
         self.canvas.draw()
         self.canvas.get_tk_widget().pack(side=tk.RIGHT,fill=tk.BOTH,expand=True)
-        
+        '''
         #Displays Matplotlib figure toolbar.
         self.toolbar = NavigationToolbar2TkAgg(self.canvas, self)
         self.toolbar.update()
         self.canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+        '''
         '''
         self.flc, self.axlc = plt.subplots()
         
