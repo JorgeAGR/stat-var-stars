@@ -290,11 +290,11 @@ class ObjectID(object):
         phdu = fits.PrimaryHDU(header = head) # Creates PrimaryHDU from defined Header. == Metadata Here ==
         
         # Define columns to be used in a BinTable
-        colt = fits.Column(name = 'TIME', format = 'E', unit = 'Days (d)', array = self.TIME) # Time Column
-        collc = fits.Column(name = 'LC', format = 'E', unit = 'Amplitude (ppm)', array = self.LC) # LC Column
-        colelc = fits.Column(name = 'E_LC', format = 'E', unit = 'Amplitude (ppm)', array = self.E_LC) # LC Column
-        colfreq = fits.Column(name = 'FREQS', format = 'E', unit = 'Cycles per Day (1/d)', array = self.FREQS) # LC Column
-        colps = fits.Column(name = 'AMP_LOMBSCARG', format = 'E', unit = 'Amplitude (ppm)', array = self.A_LS) # PS Column
+        colt = fits.Column(name = 'TIME', format = 'D', unit = 'Days (d)', array = self.TIME) # Time Column
+        collc = fits.Column(name = 'LC', format = 'D', unit = 'Amplitude (ppm)', array = self.LC) # LC Column
+        colelc = fits.Column(name = 'E_LC', format = 'D', unit = 'Amplitude (ppm)', array = self.E_LC) # LC Column
+        colfreq = fits.Column(name = 'FREQS', format = 'D', unit = 'Cycles per Day (1/d)', array = self.FREQS) # LC Column
+        colps = fits.Column(name = 'AMP_LOMBSCARG', format = 'D', unit = 'Amplitude (ppm)', array = self.A_LS) # PS Column
         #colflag = fits.Column(name = 'FLAGS', format = 'I', array = self.FLAG)
         
         coldefsdata = fits.ColDefs([colt, collc, colelc]) # "Zips" the columns together

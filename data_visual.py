@@ -121,9 +121,9 @@ class PlotCanvas(tk.Frame):
         self.canvas.get_tk_widget().pack(side=tk.RIGHT,fill=tk.BOTH,expand=True)
         
         #Displays Matplotlib figure toolbar.
-        #self.toolbar = NavigationToolbar2TkAgg(self.canvas, self)
-        #self.toolbar.update()
-        #self.canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+        self.toolbar = NavigationToolbar2TkAgg(self.canvas, self)
+        self.toolbar.update()
+        self.canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
         '''
         self.flc, self.axlc = plt.subplots()
         
@@ -560,6 +560,8 @@ class MainApp(tk.Tk):
         freq = self.obj.cards['FREQS']
         als = self.obj.cards['AMP_LOMBSCARG']
         flag = self.obj.FLAGS[-1]
+        
+        print(len(lc))
         
         time = time - time[0]
         aspercent = self.ASTools.percent.get() / 100
