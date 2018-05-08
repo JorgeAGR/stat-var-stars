@@ -562,8 +562,6 @@ class MainApp(tk.Tk):
         als = self.obj.cards['AMP_LOMBSCARG']
         flag = self.obj.FLAGS[-1]
         
-        print(len(lc))
-        
         time = time - time[0]
         aspercent = self.ASTools.percent.get() / 100
         
