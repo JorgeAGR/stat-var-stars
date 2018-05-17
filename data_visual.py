@@ -371,6 +371,7 @@ class MainApp(tk.Tk):
         menubar = tk.Menu(self)
         
         filemenu = tk.Menu(menubar, tearoff = 0)
+        filemenu.add_command(label = 'Save Target List', command = self.savelist)
         filemenu.add_command(label = "Save As PDF", command = self.savepdf)
         filemenu.add_separator()
         filemenu.add_command(label = "Exit", command=quit)
@@ -725,6 +726,14 @@ class MainApp(tk.Tk):
         plt.ylabel('log(g)')
         plt.gca().invert_yaxis()
         plt.gca().invert_xaxis()
+    
+    def savelist(self):
+        
+        with open('targetlist.txt', 'w+') as targetlist:
+            for f in self.Menu.filelist:
+                star = f.rstrip('.fits')
+                targetlist.write(star)
+                targetlist.write('\n')
     
     def savepdf(self):
         
