@@ -181,6 +181,7 @@ class ObjectID(object):
             filename = 'epic_4_27Feb2018.txt'
         elif 250000000 >= self.EPIC >= 240000001:
             filename = 'epic_5_27Feb2018.txt'
+            print('here')
         elif 251809654 >= self.EPIC >= 250000001:
             filename = 'epic_6_27Feb2018.txt'
         

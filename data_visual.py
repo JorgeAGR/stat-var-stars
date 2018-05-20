@@ -729,10 +729,10 @@ class MainApp(tk.Tk):
     
     def savelist(self):
         
-        with open('targetlist.txt', 'w+') as targetlist:
+        with open('targetlist.txt', 'a+') as targetlist:
             for f in self.Menu.filelist:
                 star = f.rstrip('.fits')
-                targetlist.write(star)
+                targetlist.write('EPIC ' + star)
                 targetlist.write('\n')
     
     def savepdf(self):
