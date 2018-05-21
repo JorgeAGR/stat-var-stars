@@ -4,14 +4,14 @@
 for human analysis purpose
 '''
 import tkinter as tk
-#matplotlib.use("TkAgg")
+import matplotlib as mpl
+mpl.use('TkAgg')
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
-
 import os
+import sys
 import csv
 from astropy.io import fits
 import numpy as np
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter
@@ -887,12 +887,19 @@ class MainApp(tk.Tk):
                         pass
                     page.append(pypdf2.PdfFileReader(figpdf))
                     page.write('k2data.pdf')
-        
+
+def win_closed():
+    print('Saving flags...')
+    newflags = np.array([])
+    for star in starlist:
+        newflags = np.append(newflags, starlist[star][2])
+    
+    np.save('etc/flagarray.npy', newflags)
+    
+    print("Exiting...")
+    app.destroy()
+    sys.exit()
+
 app = MainApp()
+app.protocol("WM_DELETE_WINDOW", win_closed)
 app.mainloop()
-
-newflags = np.array([])
-for star in starlist:
-    newflags = np.append(newflags, starlist[star][2])
-
-np.save('etc/flagarray.npy', newflags)

@@ -171,6 +171,35 @@ class ObjectID(object):
             self.writeData()
     
     def searchEpic(self):
+        
+        def getMetaData(fields):
+            self.JMAG = fields[31]
+            self.E_JMAG = fields[32] 
+            self.HMAG = fields[33]
+            self.E_HMAG = fields[34]
+            self.KMAG = fields[35]
+            self.E_KMAG = fields[36]
+            self.KP = fields[45]
+            self.TEFF = fields[46]
+            self.E_TEFF = fields[47]
+            self.LOGG = fields[49]
+            self.E_LOGG = fields[50]
+            self.FEH = fields[52]
+            self.E_FEH = fields[53]
+            self.RAD = fields[55]
+            self.E_RAD = fields[56]
+            self.MASS = fields[58]
+            self.E_MASS = fields[59]
+            self.RHO = fields[61]
+            self.E_RHO = fields[62]
+            self.LUM = fields[64]
+            self.E_LUM = fields[65]
+            self.D = fields[67]
+            self.E_JMAG = fields[32] 
+            self.E_D = fields[68]
+            self.EBV = fields[70]
+            self.E_EBV = fields[71]
+        
         if 210000000 >= self.EPIC >= 201000001:
             filename = 'epic_1_27Feb2018.txt'
         elif 220000000 >= self.EPIC >= 210000001:
@@ -184,67 +213,20 @@ class ObjectID(object):
         elif 251809654 >= self.EPIC >= 250000001:
             filename = 'epic_6_27Feb2018.txt'
         
+        #Problem is that some targets don't even have metadata. So, make them N/A's
+        
         with open('epic-catalog/' + filename) as file:
             for line in file:
                 if str(self.EPIC) in line:
                     try:
                         fields = line.split('|')
-                        self.JMAG = fields[31]
-                        self.E_JMAG = fields[32] 
-                        self.HMAG = fields[33]
-                        self.E_HMAG = fields[34]
-                        self.KMAG = fields[35]
-                        self.E_KMAG = fields[36]
-                        self.KP = fields[45]
-                        self.TEFF = fields[46]
-                        self.E_TEFF = fields[47]
-                        self.LOGG = fields[49]
-                        self.E_LOGG = fields[50]
-                        self.FEH = fields[52]
-                        self.E_FEH = fields[53]
-                        self.RAD = fields[55]
-                        self.E_RAD = fields[56]
-                        self.MASS = fields[58]
-                        self.E_MASS = fields[59]
-                        self.RHO = fields[61]
-                        self.E_RHO = fields[62]
-                        self.LUM = fields[64]
-                        self.E_LUM = fields[65]
-                        self.D = fields[67]
-                        self.E_JMAG = fields[32] 
-                        self.E_D = fields[68]
-                        self.EBV = fields[70]
-                        self.E_EBV = fields[71]
+                        getMetaData(fields)
                         break
                     except:
                         fields = line.split(' ')
                         fields = fields[0].split('\t')
-                        self.JMAG = fields[31]
-                        self.E_JMAG = fields[32] 
-                        self.HMAG = fields[33]
-                        self.E_HMAG = fields[34]
-                        self.KMAG = fields[35]
-                        self.E_KMAG = fields[36]
-                        self.KP = fields[45]
-                        self.TEFF = fields[46]
-                        self.E_TEFF = fields[47]
-                        self.LOGG = fields[49]
-                        self.E_LOGG = fields[50]
-                        self.FEH = fields[52]
-                        self.E_FEH = fields[53]
-                        self.RAD = fields[55]
-                        self.E_RAD = fields[56]
-                        self.MASS = fields[58]
-                        self.E_MASS = fields[59]
-                        self.RHO = fields[61]
-                        self.E_RHO = fields[62]
-                        self.LUM = fields[64]
-                        self.E_LUM = fields[65]
-                        self.D = fields[67]
-                        self.E_JMAG = fields[32] 
-                        self.E_D = fields[68]
-                        self.EBV = fields[70]
-                        self.E_EBV = fields[71]
+                        getMetaData(fields)
+                        break
     
     def processData(self):
         def frequency_grid(time, samples, oversampling):
