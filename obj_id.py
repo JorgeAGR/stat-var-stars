@@ -173,32 +173,60 @@ class ObjectID(object):
     def searchEpic(self):
         
         def getMetaData(fields):
-            self.JMAG = fields[31]
-            self.E_JMAG = fields[32] 
-            self.HMAG = fields[33]
-            self.E_HMAG = fields[34]
-            self.KMAG = fields[35]
-            self.E_KMAG = fields[36]
-            self.KP = fields[45]
-            self.TEFF = fields[46]
-            self.E_TEFF = fields[47]
-            self.LOGG = fields[49]
-            self.E_LOGG = fields[50]
-            self.FEH = fields[52]
-            self.E_FEH = fields[53]
-            self.RAD = fields[55]
-            self.E_RAD = fields[56]
-            self.MASS = fields[58]
-            self.E_MASS = fields[59]
-            self.RHO = fields[61]
-            self.E_RHO = fields[62]
-            self.LUM = fields[64]
-            self.E_LUM = fields[65]
-            self.D = fields[67]
-            self.E_JMAG = fields[32] 
-            self.E_D = fields[68]
-            self.EBV = fields[70]
-            self.E_EBV = fields[71]
+            if fields:
+                self.JMAG = fields[31]
+                self.E_JMAG = fields[32] 
+                self.HMAG = fields[33]
+                self.E_HMAG = fields[34]
+                self.KMAG = fields[35]
+                self.E_KMAG = fields[36]
+                self.KP = fields[45]
+                self.TEFF = fields[46]
+                self.E_TEFF = fields[47]
+                self.LOGG = fields[49]
+                self.E_LOGG = fields[50]
+                self.FEH = fields[52]
+                self.E_FEH = fields[53]
+                self.RAD = fields[55]
+                self.E_RAD = fields[56]
+                self.MASS = fields[58]
+                self.E_MASS = fields[59]
+                self.RHO = fields[61]
+                self.E_RHO = fields[62]
+                self.LUM = fields[64]
+                self.E_LUM = fields[65]
+                self.D = fields[67]
+                self.E_JMAG = fields[32] 
+                self.E_D = fields[68]
+                self.EBV = fields[70]
+                self.E_EBV = fields[71]
+            else:
+                self.JMAG = 'N/A'
+                self.E_JMAG = 'N/A'
+                self.HMAG = 'N/A'
+                self.E_HMAG = 'N/A'
+                self.KMAG = 'N/A'
+                self.E_KMAG = 'N/A'
+                self.KP = 'N/A'
+                self.TEFF = 'N/A'
+                self.E_TEFF = 'N/A'
+                self.LOGG = 'N/A'
+                self.E_LOGG = 'N/A'
+                self.FEH = 'N/A'
+                self.E_FEH = 'N/A'
+                self.RAD = 'N/A'
+                self.E_RAD = 'N/A'
+                self.MASS = 'N/A'
+                self.E_MASS = 'N/A'
+                self.RHO = 'N/A'
+                self.E_RHO = 'N/A'
+                self.LUM = 'N/A'
+                self.E_LUM = 'N/A'
+                self.D = 'N/A'
+                self.E_JMAG = 'N/A'
+                self.E_D = 'N/A'
+                self.EBV = 'N/A'
+                self.E_EBV = 'N/A'
         
         if 210000000 >= self.EPIC >= 201000001:
             filename = 'epic_1_27Feb2018.txt'
@@ -213,20 +241,21 @@ class ObjectID(object):
         elif 251809654 >= self.EPIC >= 250000001:
             filename = 'epic_6_27Feb2018.txt'
         
-        #Problem is that some targets don't even have metadata. So, make them N/A's
-        
-        with open('epic-catalog/' + filename) as file:
-            for line in file:
-                if str(self.EPIC) in line:
-                    try:
-                        fields = line.split('|')
-                        getMetaData(fields)
-                        break
-                    except:
-                        fields = line.split(' ')
-                        fields = fields[0].split('\t')
-                        getMetaData(fields)
-                        break
+        try:
+            with open('epic-catalog/' + filename) as file:
+                for line in file:
+                    if str(self.EPIC) in line:
+                        try:
+                            fields = line.split('|')
+                            getMetaData(fields)
+                            break
+                        except:
+                            fields = line.split(' ')
+                            fields = fields[0].split('\t')
+                            getMetaData(fields)
+                            break
+        except:
+            getMetaData(None)
     
     def processData(self):
         def frequency_grid(time, samples, oversampling):
@@ -322,6 +351,9 @@ class ObjectID(object):
         binthduamp.name = 'SPECTRUM'
         
         hdul = fits.HDUList([phdu, binthdudata, binthduamp])#, binthduflag]) # Creates an HDUList from the PrimaryHDU and BinTableHDU
-        hdul.writeto(directory + str(self.EPIC) + '.fits') # Writes to assigned directory with object's EPIC ID
+        if os.path.exists(directory + str(self.EPIC) + '.fits'):
+            hdul.writeto(directory + str(self.EPIC) + '-b.fits')
+        else:
+            hdul.writeto(directory + str(self.EPIC) + '.fits') # Writes to assigned directory with object's EPIC ID
 
 CampaignManager()
