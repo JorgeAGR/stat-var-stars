@@ -3,9 +3,9 @@
 + Simple GUI that allows visualization of data
 for human analysis purpose
 '''
-import tkinter as tk
 import matplotlib as mpl
 mpl.use('TkAgg')
+import tkinter as tk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
 import os
 import sys
@@ -42,6 +42,8 @@ def flag2label(n):
         return 'LFO'
     elif n == 6:
         return 'HFO'
+    elif n == 7:
+        return 'Interesting'
     elif n == 0:
         return 'Junk'
 
@@ -255,6 +257,10 @@ class SearchTools(tk.LabelFrame):
         self.dghybcheck = tk.Checkbutton(types, text = r'D/G Hybrid', variable = self.dghybvar)
         self.dghybcheck.grid(row = 1, column = 1, sticky = 'W')
         
+        self.intvar = tk.BooleanVar()
+        self.intcheck = tk.Checkbutton(types, text = 'Interesting', variable = self.intvar)
+        self.intcheck.grid(row = 2, column = 0, sticky = 'W')
+        
         self.searchbutton = tk.Button(self, text = 'Search', command = command)
         self.searchbutton.grid(row = 3)
 
@@ -328,18 +334,33 @@ class Display(tk.LabelFrame): #WORK ON THIS
         i = 0
         #for i in range(len(obj.cards.keys())):
         while True:
-            i += 1
-            valuetitle = str(list(obj.cards.keys())[i])
-            uncertaintytitle = str(list(obj.cards.keys())[i+1])
-            if (i != 14) and (i >= 8):
-                tk.Label(self.frame, text = valuetitle + ': ' + 
-                         str(obj.cards[valuetitle]) + ' +/- ' +
-                         str(obj.cards[uncertaintytitle])).grid(row = i, sticky = 'W')
+            if 'TWOMASS' in obj.cards.keys():
                 i += 1
+                valuetitle = str(list(obj.cards.keys())[i])
+                uncertaintytitle = str(list(obj.cards.keys())[i+1])
+                if (i != 15) and (i >= 9):
+                    tk.Label(self.frame, text = valuetitle + ': ' + 
+                             str(obj.cards[valuetitle]) + ' +/- ' +
+                             str(obj.cards[uncertaintytitle])).grid(row = i, sticky = 'W')
+                    i += 1
+                else:
+                    tk.Label(self.frame, text = valuetitle + ': ' + str(obj.cards[valuetitle])).grid(row = i, sticky = 'W')
+                if i == 33:
+                    break
             else:
-                tk.Label(self.frame, text = valuetitle + ': ' + str(obj.cards[valuetitle])).grid(row = i, sticky = 'W')
-            if i == 32:
-                break
+                i += 1
+                valuetitle = str(list(obj.cards.keys())[i])
+                uncertaintytitle = str(list(obj.cards.keys())[i+1])
+                if (i != 14) and (i >= 8):
+                    tk.Label(self.frame, text = valuetitle + ': ' + 
+                             str(obj.cards[valuetitle]) + ' +/- ' +
+                             str(obj.cards[uncertaintytitle])).grid(row = i, sticky = 'W')
+                    i += 1
+                else:
+                    tk.Label(self.frame, text = valuetitle + ': ' + str(obj.cards[valuetitle])).grid(row = i, sticky = 'W')
+                if i == 32:
+                    break
+                
 
 class Window(tk.Toplevel):
     
@@ -349,6 +370,7 @@ class Window(tk.Toplevel):
         
         self.canvas = PlotCanvas(self)
         self.canvas.pack(fill=tk.BOTH, expand=True)
+        self.geometry('1000x400')
 
 class EntryPopUp(tk.Toplevel):
     
@@ -367,6 +389,10 @@ class MainApp(tk.Tk):
         tk.Tk.__init__(self, *args, **kwargs)
         
         tk.Tk.wm_title(self, 'K2 Campaign Viewer')
+        
+        #tk.Tk.wm_aspect(self, minNumer = 1, minDenom = 2, maxNumer = 8, maxDenom = 12)
+        tk.Tk.wm_aspect(self, minNumer = 1, minDenom = 1 , maxNumer = 1 , maxDenom = 1)
+        tk.Tk.wm_geometry(self, '900x900')
         
         menubar = tk.Menu(self)
         
@@ -449,7 +475,7 @@ class MainApp(tk.Tk):
         self.bind('s', self.keyPress)
         self.bind('f', self.keyPress)
         self.bind('j', self.keyPress)
-        #self.bind(4, self.numberPress)
+        self.bind('i', self.keyPress)
     
     def selectFile(self,event):
         file = self.Menu.selectedFile()
@@ -463,6 +489,7 @@ class MainApp(tk.Tk):
         def check(minx, maxx, x):
             if minx <= x <= maxx:
                 return True
+        
         def remove(file):
             filelist.remove(file)
         
@@ -480,18 +507,22 @@ class MainApp(tk.Tk):
         gdor = self.SearchTools.gdorvar.get()
         binary = self.SearchTools.binvar.get()
         hybrid = self.SearchTools.dghybvar.get()
+        interest = self.SearchTools.intvar.get()
         
         minteff = str2float(minteff, True)
         maxteff = str2float(maxteff, False)
         minlogg = str2float(minlogg, True)
         maxlogg = str2float(maxlogg, False)
         
-        allowed = [get(dsct, 1), get(gdor, 2), get(hybrid, 3), get(binary, 4)]
+        allowed = [get(dsct, 1), get(gdor, 2), get(hybrid, 3), get(binary, 4), get(interest, 7)]
         
         rm = []
         
         for f in filelist:
-            star = starlist[f.rstrip('.fits')]
+            if '-b' in f:
+                star = starlist[f.rstrip('-b.fits')]
+            else:
+                star = starlist[f.rstrip('.fits')]
             axe = False
             
             for i in allowed:
@@ -504,11 +535,11 @@ class MainApp(tk.Tk):
                     axe = True
                     #rm.append(f)
             elif minteff or maxteff:
-                if not check(minteff, maxteff, star[0]):
+                if not check(minteff, maxteff, str2float(star[0], True)):
                     axe = True
                     #rm.append(f)
             elif minlogg or maxlogg:
-                if not check(minlogg, maxlogg, star[1]):
+                if not check(minlogg, maxlogg, str2float(star[1], True)):
                     axe = True
                     #rm.append(f)
             if axe:
@@ -533,6 +564,8 @@ class MainApp(tk.Tk):
             self.updateFlag(5) # Low Freq Other
         elif event.keysym == 'f':
             self.updateFlag(6) # High Freq Other
+        elif event.keysym == 'i':
+            self.updateFlag(7)
         elif event.keysym == 'j':
             self.updateFlag(0) # Junk
     
@@ -665,11 +698,13 @@ class MainApp(tk.Tk):
         if param == 'TEFF':
             if mission:
                 for star in starlist:
-                    parameter_array.append(starlist[star][0])
+                    if not ('-b' in str(star)) and not (starlist[str(star)][0] in ('N/A', 'nan')):
+                        parameter_array.append(starlist[star][0])
             else:
                 for file in self.Menu.filelist:
-                    parameter_array.append(starlist[file.rstrip('.fits')][0])
-            parameter_array = np.asarray(parameter_array)[~np.isnan(parameter_array)]
+                    if not ('-b' in str(file)) and not (starlist[file.rstrip('.fits')][0] in ('N/A', 'nan')):
+                        parameter_array.append(float(starlist[file.rstrip('.fits')][0]))
+            parameter_array = np.asarray(parameter_array)#[~np.isnan(parameter_array)]
             
             plt.hist(parameter_array, bins = np.arange(np.floor(parameter_array.min() / 500) * 500,
                                                        np.ceil(parameter_array.max() / 500) * 500, 500), color = 'black')
@@ -685,11 +720,14 @@ class MainApp(tk.Tk):
         if param == 'LOGG':
             if mission:
                 for star in starlist:
-                    parameter_array.append(starlist[star][1])
+                    if not ('-b' in str(star)) and not (starlist[str(star)][1] in ('N/A', 'nan')):
+                        parameter_array.append(starlist[star][0])
             else:
                 for file in self.Menu.filelist:
-                    parameter_array.append(starlist[file.rstrip('.fits')][1])
-            parameter_array = np.asarray(parameter_array)[~np.isnan(parameter_array)]
+                    if not ('-b' in str(file)) and not (starlist[file.rstrip('.fits')][1] in ('N/A', 'nan')):
+                        parameter_array.append(float(starlist[file.rstrip('.fits')][1]))
+            parameter_array = np.asarray(parameter_array)#[~np.isnan(parameter_array)]
+            5
             plt.hist(parameter_array, bins = np.arange(np.floor(parameter_array.min() / 0.25) * 0.25,
                                                        np.ceil(parameter_array.max() / 0.25) * 0.25, 0.25), color = 'black')
             if mission:
@@ -704,26 +742,45 @@ class MainApp(tk.Tk):
     def hr(self, mission):
         
         if mission:
-            logg_array = []
-            teff_array = []
+            logg_dic = {1 : [], 2 : [], 3 : [], 4 : [], 'other' : []}
+            teff_dic = {1 : [], 2 : [], 3 : [], 4 : [], 'other' : []}
             for star in starlist:
-                logg_array.append(starlist[star][1])
-                teff_array.append(starlist[star][0])
+                if not ('-b' in str(star)) and not ((starlist[str(star)][0] or starlist[str(star)][1]) in ('N/A', 'nan')):
+                    #logg_array.append(float(starlist[star][1]))
+                    #teff_array.append(float(starlist[star][0]))
+                    if starlist[star][2] in (1, 2, 3, 4):
+                        logg_dic[starlist[star][2]].append(float(starlist[star][1]))
+                        teff_dic[starlist[star][2]].append(float(starlist[star][0]))
+                    else:
+                        logg_dic['other'].append(float(starlist[star][1]))
+                        teff_dic['other'].append(float(starlist[star][0]))
         else:
-            logg_array = []
-            teff_array = []
+            logg_dic = {1 : [], 2 : [], 3 : [], 4 : [], 'other' : []}
+            teff_dic = {1 : [], 2 : [], 3 : [], 4 : [], 'other' : []}
             for file in self.Menu.filelist:
-                logg_array.append(starlist[file.rstrip('.fits')][1])
-                teff_array.append(starlist[file.rstrip('.fits')][0])
+                if not ('-b' in str(file)) and not ((starlist[file.rstrip('.fits')][0] or starlist[file.rstrip('.fits')][1]) in ('N/A', 'nan')):
+                    #logg_array.append(float(starlist[file.rstrip('.fits')][1]))
+                    #teff_array.append(float(starlist[file.rstrip('.fits')][0]))
+                    if starlist[file.rstrip('.fits')][2] in (1, 2, 3, 4):
+                        logg_dic[starlist[file.rstrip('.fits')][2]].append(float(starlist[file.rstrip('.fits')][1]))
+                        teff_dic[starlist[file.rstrip('.fits')][2]].append(float(starlist[file.rstrip('.fits')][0]))
+                    else:
+                        logg_dic['other'].append(float(starlist[file.rstrip('.fits')][1]))
+                        teff_dic['other'].append(float(starlist[file.rstrip('.fits')][0]))
         
         hr = Window()
-        plt.plot(teff_array, logg_array, '.', color = 'gray')
+        plt.plot(teff_dic['other'], logg_dic['other'], '.', color = 'gray', label = 'Other')
+        plt.plot(teff_dic[1], logg_dic[1], '.', color = 'red', label = flag2label(1))
+        plt.plot(teff_dic[2], logg_dic[2], '.', color = 'blue', label = flag2label(2))
+        plt.plot(teff_dic[3], logg_dic[3], '.', color = 'purple', label = flag2label(3))
+        plt.plot(teff_dic[4], logg_dic[4], '.', color = 'green', label = flag2label(4))
         if mission:
             plt.title('K2 Mission' + ': HR Diagram')
         else:
             plt.title(str(self.Menu.campaign_str.get()) + ': HR Diagram')
         plt.xlabel(r'$T_{Eff}$ (K)')
         plt.ylabel('log(g)')
+        plt.legend()
         plt.gca().invert_yaxis()
         plt.gca().invert_xaxis()
     
@@ -731,9 +788,10 @@ class MainApp(tk.Tk):
         
         with open('targetlist.txt', 'a+') as targetlist:
             for f in self.Menu.filelist:
-                star = f.rstrip('.fits')
-                targetlist.write('EPIC ' + star)
-                targetlist.write('\n')
+                if '-b' not in f:
+                    star = f.rstrip('.fits')
+                    targetlist.write('EPIC ' + star)
+                    targetlist.write('\n')
     
     def savepdf(self):
         
@@ -833,45 +891,77 @@ class MainApp(tk.Tk):
             skip1 = 0
             skip2 = 0
             while True:
-                i += 1
-                valuetitle = str(list(self.obj.cards.keys())[i])
-                uncertaintytitle = str(list(self.obj.cards.keys())[i+1])
-                if i in [15, 17]:
-                    text = valuetitle + ': ' + str(self.obj.cards[valuetitle]) + ' +/- ' + str(self.obj.cards[uncertaintytitle])
-                    plt.figtext(x3, 0.825, text, horizontalalignment='left',
-                        fontsize=10, multialignment='left')
+                if 'TWOMASS' in self.obj.cards.keys():
                     i += 1
-                    x3 += 0.125
-                elif (i != 14) and (i >= 8):
-                    text = valuetitle + ': ' + str(self.obj.cards[valuetitle]) + ' +/- ' + str(self.obj.cards[uncertaintytitle])
-                    plt.figtext(x2, y2, text, horizontalalignment='left',
-                        fontsize=10, multialignment='left')
-                    i += 1
-                    x2 += 0.15
-                    skip2 += 1
-                    if skip2 == 5:
-                        y2 += -0.025
-                        x2 = 0.075
-                        skip2 = 0
-                else:
-                    
-                    text = valuetitle + ': ' + str(self.obj.cards[valuetitle])
-                    plt.figtext(x1, y1, text, horizontalalignment='left',
-                        fontsize=10, multialignment='left')
-                    x1 += 0.15
-                    skip1 += 1
-                    if skip1 == 4:
-                        y1 += -0.025
-                        x1 = 0.075
-                        skip1 = 0
-                    '''
-                    elif i == 7:
-                        x1 += 0.175
+                    valuetitle = str(list(self.obj.cards.keys())[i])
+                    uncertaintytitle = str(list(self.obj.cards.keys())[i+1])
+                    if i in [16, 18]:
+                        text = valuetitle + ': ' + str(self.obj.cards[valuetitle]) + ' +/- ' + str(self.obj.cards[uncertaintytitle])
+                        plt.figtext(x3, 0.825, text, horizontalalignment='left',
+                            fontsize=10, multialignment='left')
+                        i += 1
+                        x3 += 0.125
+                    elif (i != 15) and (i >= 9):
+                        text = valuetitle + ': ' + str(self.obj.cards[valuetitle]) + ' +/- ' + str(self.obj.cards[uncertaintytitle])
+                        plt.figtext(x2, y2, text, horizontalalignment='left',
+                            fontsize=10, multialignment='left')
+                        i += 1
+                        x2 += 0.15
+                        skip2 += 1
+                        if skip2 == 5:
+                            y2 += -0.025
+                            x2 = 0.075
+                            skip2 = 0
+                    elif (i == 8):
+                        text = valuetitle + ': ' + str(self.obj.cards[valuetitle])
+                        plt.figtext(0.675, 0.95, text, horizontalalignment='left',
+                            fontsize=10, multialignment='left')
                     else:
-                        x1 += 0.1
-                    '''
-                if i == 32:
-                    break
+                        text = valuetitle + ': ' + str(self.obj.cards[valuetitle])
+                        plt.figtext(x1, y1, text, horizontalalignment='left',
+                            fontsize=10, multialignment='left')
+                        x1 += 0.15
+                        skip1 += 1
+                        if skip1 == 4:
+                            y1 += -0.025
+                            x1 = 0.075
+                            skip1 = 0
+                    if i == 33:
+                        break
+                else:
+                    i += 1
+                    valuetitle = str(list(self.obj.cards.keys())[i])
+                    uncertaintytitle = str(list(self.obj.cards.keys())[i+1])
+                    if i in [15, 17]:
+                        text = valuetitle + ': ' + str(self.obj.cards[valuetitle]) + ' +/- ' + str(self.obj.cards[uncertaintytitle])
+                        plt.figtext(x3, 0.825, text, horizontalalignment='left',
+                            fontsize=10, multialignment='left')
+                        i += 1
+                        x3 += 0.125
+                    elif (i != 14) and (i >= 8):
+                        text = valuetitle + ': ' + str(self.obj.cards[valuetitle]) + ' +/- ' + str(self.obj.cards[uncertaintytitle])
+                        plt.figtext(x2, y2, text, horizontalalignment='left',
+                            fontsize=10, multialignment='left')
+                        i += 1
+                        x2 += 0.15
+                        skip2 += 1
+                        if skip2 == 5:
+                            y2 += -0.025
+                            x2 = 0.075
+                            skip2 = 0                    
+                    else:
+                        
+                        text = valuetitle + ': ' + str(self.obj.cards[valuetitle])
+                        plt.figtext(x1, y1, text, horizontalalignment='left',
+                            fontsize=10, multialignment='left')
+                        x1 += 0.15
+                        skip1 += 1
+                        if skip1 == 4:
+                            y1 += -0.025
+                            x1 = 0.075
+                            skip1 = 0
+                    if i == 32:
+                        break
             
             with PdfPages('lastfig.pdf') as pdf:
                 pdf.savefig(fig)
@@ -887,19 +977,23 @@ class MainApp(tk.Tk):
                         pass
                     page.append(pypdf2.PdfFileReader(figpdf))
                     page.write('k2data.pdf')
-
-def win_closed():
-    print('Saving flags...')
-    newflags = np.array([])
-    for star in starlist:
-        newflags = np.append(newflags, starlist[star][2])
-    
-    np.save('etc/flagarray.npy', newflags)
-    
+'''
+def win_closed():    
     print("Exiting...")
     app.destroy()
     sys.exit()
+'''
 
 app = MainApp()
-app.protocol("WM_DELETE_WINDOW", win_closed)
+app.tk.call('tk', 'scaling', 2.0)
+#app.protocol("WM_DELETE_WINDOW", win_closed)
 app.mainloop()
+
+print('Saving flags...')
+
+newflags = np.array([])
+for i in stars:
+    n = starlist[i][2]
+    newflags = np.append(newflags, n)
+
+np.save('etc/flagarray.npy', newflags)

@@ -47,7 +47,7 @@ class CampaignManager(object):
     
     def main(self):
         
-        main = '\n= Menu =\n1) Download\n2) Process\n3) Exit\n\nSelect an option: '
+        main = '\n= Menu =\n1) Download\n2) Process\n3) Reload Starlist\n4) Exit\n\nSelect an option: '
         while True:
             option = input(main)
             
@@ -109,6 +109,9 @@ Enter campaign(s) to be processed: '''
                     self.process(campaign)
                 createnpz.stardic()
                 
+            elif option in ('3', 'reload', 'Reload', 'RELOAD'):
+                createnpz.stardic()
+            
             else:
                 print('Exiting...\nBye!')
                 break
@@ -128,7 +131,6 @@ Enter campaign(s) to be processed: '''
                 print('Finished Campaign ' + str(campaign))
         else:
             print('Campaign ' + str(campaign) + ' already processed!')
-        
 
 class ObjectID(object):
     
@@ -174,6 +176,7 @@ class ObjectID(object):
         
         def getMetaData(fields):
             if fields:
+                self.TWOMASS = fields[4]
                 self.JMAG = fields[31]
                 self.E_JMAG = fields[32] 
                 self.HMAG = fields[33]
@@ -201,6 +204,7 @@ class ObjectID(object):
                 self.EBV = fields[70]
                 self.E_EBV = fields[71]
             else:
+                self.TWOMASS = 'N/A'
                 self.JMAG = 'N/A'
                 self.E_JMAG = 'N/A'
                 self.HMAG = 'N/A'
