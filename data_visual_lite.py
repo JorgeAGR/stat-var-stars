@@ -116,11 +116,20 @@ class PlotCanvas(tk.Frame):
         
         tk.Frame.__init__(self,parent)
         
+        #self.columnconfigure(0, weight = 1)
+        #self.rowconfigure(0, weight = 1)
+        
         self.f, self.ax = plt.subplots()
+        self.f.set_size_inches(8, 2)
         
         self.canvas = FigureCanvasTkAgg(self.f, self)
         self.canvas.draw()
         self.canvas.get_tk_widget().pack(side=tk.RIGHT,fill=tk.BOTH,expand=True)
+        
+        #self.canvas.resize_event()
+        
+        #self.canvas.get_tk_widget().grid(row = 0, column = 0,
+                                 #columnspan = 2, sticky = 'NWSE')
         '''
         #Displays Matplotlib figure toolbar.
         self.toolbar = NavigationToolbar2TkAgg(self.canvas, self)
@@ -413,8 +422,8 @@ class MainApp(tk.Tk):
         tk.Tk.wm_title(self, 'K2 Campaign Viewer')
         
         #tk.Tk.wm_aspect(self, minNumer = 1, minDenom = 2, maxNumer = 8, maxDenom = 12)
-        tk.Tk.wm_aspect(self, minNumer = 1, minDenom = 1 , maxNumer = 1 , maxDenom = 1)
-        tk.Tk.wm_geometry(self, '600x600')
+        #tk.Tk.wm_aspect(self, minNumer = 1, minDenom = 1 , maxNumer = 1 , maxDenom = 1)
+        tk.Tk.wm_geometry(self, '900x575')
         
         menubar = tk.Menu(self)
         
@@ -459,22 +468,28 @@ class MainApp(tk.Tk):
         
         tk.Tk.config(self, menu = menubar)
         
+        
+        self.columnconfigure(0, weight = 1)
+        
         plots = tk.Frame(self)
-        #plots.grid(row = 0, column = 0, sticky = 'NEWS')
-        plots.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
+        plots.grid(row = 0, column = 0, sticky = 'NEWS')
+        #plots.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
+        
+        plots.rowconfigure(0, weight = 1)
+        plots.rowconfigure(1, weight = 1)
         
         self.CanvasLC = PlotCanvas(plots)
-        #self.CanvasLC.grid(row = 0, column = 0, sticky = 'NEWS')
-        self.CanvasLC.pack(expand = True, fill = tk.BOTH)
+        self.CanvasLC.grid(row = 0, column = 0, sticky = 'NEWS')
+        #self.CanvasLC.pack(expand = True, fill = tk.BOTH)
         
         self.CanvasA_LS = PlotCanvas(plots)
-        #self.CanvasA_LS.grid(row = 1, column = 0, sticky = 'NEWS')
-        self.CanvasA_LS.pack(expand = True, fill = tk.BOTH)
+        self.CanvasA_LS.grid(row = 1, column = 0, sticky = 'NEWS')
+        #self.CanvasA_LS.pack(expand = True, fill = tk.BOTH)
         
         
         sidebar = tk.Frame(self)
-        #sidebar.grid(row = 0, column = 1, sticky = 'NS')
-        sidebar.pack(side = tk.LEFT, fill = tk.Y)
+        sidebar.grid(row = 0, column = 1, sticky = 'NS')
+        #sidebar.pack(side = tk.LEFT, fill = tk.Y)
         
         self.Menu = Menu(sidebar)
         #self.Menu.grid(row = 0, column = 1, sticky = 'NS')
@@ -1016,23 +1031,23 @@ class MainApp(tk.Tk):
                         pass
                     page.append(pypdf2.PdfFileReader(figpdf))
                     page.write('k2data.pdf')
-'''
+
 def win_closed():    
     print("Exiting...")
     app.destroy()
+    
+    print('Saving flags...')
+    
+    newflags = np.array([])
+    for i in stars:
+        n = starlist[i][2]
+        newflags = np.append(newflags, n)
+    
+    np.save('etc/flagarray.npy', newflags)
+    
     sys.exit()
-'''
 
 app = MainApp()
-app.tk.call('tk', 'scaling', 2.0)
-#app.protocol("WM_DELETE_WINDOW", win_closed)
+#app.tk.call('tk', 'scaling', 2.0)
+app.protocol("WM_DELETE_WINDOW", win_closed)
 app.mainloop()
-
-print('Saving flags...')
-
-newflags = np.array([])
-for i in stars:
-    n = starlist[i][2]
-    newflags = np.append(newflags, n)
-
-np.save('etc/flagarray.npy', newflags)
