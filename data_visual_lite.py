@@ -116,11 +116,20 @@ class PlotCanvas(tk.Frame):
         
         tk.Frame.__init__(self,parent)
         
+        #self.columnconfigure(0, weight = 1)
+        #self.rowconfigure(0, weight = 1)
+        
         self.f, self.ax = plt.subplots()
+        self.f.set_size_inches(8, 2)
         
         self.canvas = FigureCanvasTkAgg(self.f, self)
         self.canvas.draw()
         self.canvas.get_tk_widget().pack(side=tk.RIGHT,fill=tk.BOTH,expand=True)
+        
+        #self.canvas.resize_event()
+        
+        #self.canvas.get_tk_widget().grid(row = 0, column = 0,
+                                 #columnspan = 2, sticky = 'NWSE')
         '''
         #Displays Matplotlib figure toolbar.
         self.toolbar = NavigationToolbar2TkAgg(self.canvas, self)
@@ -161,7 +170,8 @@ class Menu(tk.Frame):
         self.scrollbar = tk.Scrollbar(frame_file_list)
         self.scrollbar.grid(row = 0, column = 1, sticky = 'NS')
         
-        self.list = tk.Listbox(frame_file_list, yscrollcommand = self.scrollbar.set, width = 16, exportselection = False)
+        self.list = tk.Listbox(frame_file_list, yscrollcommand = self.scrollbar.set,
+                               width = 16, height = 8, exportselection = False)
         self.list.grid(row = 0, column = 0, sticky = 'NS')
         self.scrollbar.config(command = self.list.yview)
         
@@ -204,61 +214,61 @@ class SearchTools(tk.LabelFrame):
         
         tk.LabelFrame.__init__(self, parent, text = 'Search')
         
-        self.searchbar = tk.Entry(self)
+        self.searchbar = tk.Entry(self, width = 18)
         self.searchbar.grid(row = 0)
         
         ranges = tk.Frame(self)
-        ranges.grid(row = 1)
+        ranges.grid(row = 1, sticky = 'W')
         
         minlabel = tk.Label(ranges, text = 'Min')
-        minlabel.grid(row = 0, column = 1, padx = 5)
+        minlabel.grid(row = 0, column = 1, padx = 2)
         
         maxlabel = tk.Label(ranges, text = 'Max')
-        maxlabel.grid(row = 0, column = 2, padx = 5)
+        maxlabel.grid(row = 0, column = 2, padx = 2)
         
         tefflabel = tk.Label(ranges, text = 'T_eff')
-        tefflabel.grid(row = 1, column = 0, padx = 5)
+        tefflabel.grid(row = 1, column = 0, padx = 2)
         
         logglabel = tk.Label(ranges, text = 'log(g)')
-        logglabel.grid(row = 2, column = 0, padx = 5)
+        logglabel.grid(row = 2, column = 0, padx = 2)
         
         self.minteff = tk.StringVar()
         self.minteffentry = tk.Entry(ranges, width = 5, textvariable = self.minteff)
-        self.minteffentry.grid(row = 1, column = 1, padx = 5)
+        self.minteffentry.grid(row = 1, column = 1, padx = 2)
 
         self.maxteff = tk.StringVar()
         self.maxteffentry = tk.Entry(ranges, width = 5, textvariable = self.maxteff)
-        self.maxteffentry.grid(row = 1, column = 2, padx = 5)
+        self.maxteffentry.grid(row = 1, column = 2, padx = 2)
         
         self.minlogg = tk.StringVar()
         self.minloggentry = tk.Entry(ranges, width = 5, textvariable = self.minlogg)
-        self.minloggentry.grid(row = 2, column = 1, padx = 5)
+        self.minloggentry.grid(row = 2, column = 1, padx = 2)
 
         self.maxlogg = tk.StringVar()
         self.maxloggentry = tk.Entry(ranges, width = 5, textvariable = self.maxlogg)
-        self.maxloggentry.grid(row = 2, column = 2, padx = 5)
+        self.maxloggentry.grid(row = 2, column = 2, padx = 2)
         
         types = tk.Frame(self)
         types.grid(row = 2)
         
         self.dsctvar = tk.BooleanVar()
-        self.dsctcheck = tk.Checkbutton(types, text = 'Delta Sct', variable = self.dsctvar)
+        self.dsctcheck = tk.Checkbutton(types, text = 'DSct', variable = self.dsctvar)
         self.dsctcheck.grid(row = 0, column = 0, sticky = 'W')
         
         self.gdorvar = tk.BooleanVar()
-        self.gdorcheck = tk.Checkbutton(types, text = 'Gamma Dor', variable = self.gdorvar)
+        self.gdorcheck = tk.Checkbutton(types, text = 'GDor', variable = self.gdorvar)
         self.gdorcheck.grid(row = 0, column = 1, sticky = 'W')
         
         self.binvar = tk.BooleanVar()
-        self.bincheck = tk.Checkbutton(types, text = 'Binary' , variable = self.binvar)
+        self.bincheck = tk.Checkbutton(types, text = 'Bin' , variable = self.binvar)
         self.bincheck.grid(row = 1, column = 0, sticky = 'W')
         
         self.dghybvar = tk.BooleanVar()
-        self.dghybcheck = tk.Checkbutton(types, text = r'D/G Hybrid', variable = self.dghybvar)
+        self.dghybcheck = tk.Checkbutton(types, text = r'D/GHy', variable = self.dghybvar)
         self.dghybcheck.grid(row = 1, column = 1, sticky = 'W')
         
         self.intvar = tk.BooleanVar()
-        self.intcheck = tk.Checkbutton(types, text = 'Interesting', variable = self.intvar)
+        self.intcheck = tk.Checkbutton(types, text = 'Int*', variable = self.intvar)
         self.intcheck.grid(row = 2, column = 0, sticky = 'W')
         
         self.searchbutton = tk.Button(self, text = 'Search', command = command)
@@ -278,29 +288,29 @@ class PlotTools(tk.LabelFrame):
         
         #This label simply marks X as to identify its corresponding entry boxes
         xtools = tk.Label(self,text='X')
-        xtools.grid(row = 1, column = 0,padx = 5)
+        xtools.grid(row = 1, column = 0,padx = 2)
         
         #Entry box for X Minimum
         self.minx = tk.StringVar()
         self.minrangex = tk.Entry(self,width = 6, textvariable = self.minx)
-        self.minrangex.grid(row=1,column=1,padx=5)
+        self.minrangex.grid(row=1,column=1,padx=2)
         
         #Entry box for X Maximum
         self.maxx = tk.StringVar()
         self.maxrangex = tk.Entry(self,width = 6, textvariable = self.maxx)
-        self.maxrangex.grid(row=1,column=2,padx=5)
+        self.maxrangex.grid(row=1,column=2,padx=2)
         
         #Previous descriptions repeat accordingtly to Y and Z as well
         ytools = tk.Label(self,text='Y')
-        ytools.grid(row = 2, column = 0, padx = 5, pady = (0,5))
+        ytools.grid(row = 2, column = 0, padx = 2, pady = (0,5))
         
         self.miny = tk.StringVar()
         self.minrangey = tk.Entry(self,width = 6, textvariable = self.miny)
-        self.minrangey.grid(row = 2, column = 1, padx = 5)
+        self.minrangey.grid(row = 2, column = 1, padx = 2)
         
         self.maxy = tk.StringVar()
         self.maxrangey = tk.Entry(self,width = 6, textvariable = self.maxy)
-        self.maxrangey.grid(row = 2, column = 2, padx = 5)
+        self.maxrangey.grid(row = 2, column = 2, padx = 2)
     
     def clearEntries(self):
         
@@ -315,7 +325,7 @@ class PlotTools(tk.LabelFrame):
         self.percent.set(60)
         self.percentagebox = tk.Spinbox(self, from_ = 10, to = 100,
                                         increment = 10, width = 4, textvariable = self.percent)
-        self.percentagebox.grid(row = 3, column = 2)
+        self.percentagebox.grid(row = 3, column = 2, sticky = 'W')
         
 class Display(tk.LabelFrame): #WORK ON THIS
     
@@ -326,7 +336,28 @@ class Display(tk.LabelFrame): #WORK ON THIS
         self.frame.pack(fill=tk.X, expand=True)
         
         
-    def init(self,file, flagdir):
+    def init(self, file, flagdir):
+        self.frame.destroy()
+        self.frame = tk.Frame(self)
+        self.frame.pack()
+        obj = Object(file, flagdir)
+        i = 0
+        while True:
+            if 'TWOMASS' in obj.cards.keys():
+                i += 1
+                valuetitle = str(list(obj.cards.keys())[i])
+                uncertaintytitle = str(list(obj.cards.keys())[i+1])
+                if (i != 15) and (i in (16, 18)):
+                    tk.Label(self.frame, text = valuetitle + ': ' + 
+                             str(obj.cards[valuetitle]) + ' +/- ' +
+                             str(obj.cards[uncertaintytitle])).grid(row = i, sticky = 'W')
+                    i += 1
+                elif (i in (1, 3, 4, 7, 15)):
+                    tk.Label(self.frame, text = valuetitle + ': ' + str(obj.cards[valuetitle])).grid(row = i, sticky = 'W')
+                if i == 33:
+                    break
+    
+    def allinf(self, file, flagdir):
         self.frame.destroy()
         self.frame = tk.Frame(self)
         self.frame.pack()
@@ -391,8 +422,8 @@ class MainApp(tk.Tk):
         tk.Tk.wm_title(self, 'K2 Campaign Viewer')
         
         #tk.Tk.wm_aspect(self, minNumer = 1, minDenom = 2, maxNumer = 8, maxDenom = 12)
-        tk.Tk.wm_aspect(self, minNumer = 1, minDenom = 1 , maxNumer = 1 , maxDenom = 1)
-        tk.Tk.wm_geometry(self, '900x900')
+        #tk.Tk.wm_aspect(self, minNumer = 1, minDenom = 1 , maxNumer = 1 , maxDenom = 1)
+        tk.Tk.wm_geometry(self, '900x575')
         
         menubar = tk.Menu(self)
         
@@ -429,50 +460,54 @@ class MainApp(tk.Tk):
         missionplotmenu.add_command(label = 'HR Diagram', command = self.missionhr)
         missionmenu.add_cascade(label = 'Plots', menu = missionplotmenu)
         
+        targetmenu = tk.Menu(menubar, tearoff = 0)
+        targetmenu.add_command(label = 'Display Info', command = self.showAllInfo)
+        menubar.add_cascade(label = 'Target', menu = targetmenu)
+        
+        menubar.add_command(label = 'Update Plot', command = self.updatePlot)
+        
         tk.Tk.config(self, menu = menubar)
         
-        plots = tk.Frame(self)
-        #plots.grid(row = 0, column = 0, sticky = 'NEWS')
-        plots.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
         
-        '''
-        self.Canvas = PlotCanvas(plots)
-        self.Canvas.pack(expand = True, fill = tk.BOTH)
-        '''
+        self.columnconfigure(0, weight = 1)
+        
+        plots = tk.Frame(self)
+        plots.grid(row = 0, column = 0, sticky = 'NEWS')
+        #plots.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
+        
+        plots.rowconfigure(0, weight = 1)
+        plots.rowconfigure(1, weight = 1)
         
         self.CanvasLC = PlotCanvas(plots)
-        #self.CanvasLC.grid(row = 0, column = 0, sticky = 'NEWS')
-        self.CanvasLC.pack(expand = True, fill = tk.BOTH)
+        self.CanvasLC.grid(row = 0, column = 0, sticky = 'NEWS')
+        #self.CanvasLC.pack(expand = True, fill = tk.BOTH)
         
         self.CanvasA_LS = PlotCanvas(plots)
-        #self.CanvasA_LS.grid(row = 1, column = 0, sticky = 'NEWS')
-        self.CanvasA_LS.pack(expand = True, fill = tk.BOTH)
+        self.CanvasA_LS.grid(row = 1, column = 0, sticky = 'NEWS')
+        #self.CanvasA_LS.pack(expand = True, fill = tk.BOTH)
         
         
         sidebar = tk.Frame(self)
-        #sidebar.grid(row = 0, column = 1, sticky = 'NS')
-        sidebar.pack(side = tk.LEFT, fill = tk.Y)
+        sidebar.grid(row = 0, column = 1, sticky = 'NS')
+        #sidebar.pack(side = tk.LEFT, fill = tk.Y)
         
         self.Menu = Menu(sidebar)
         #self.Menu.grid(row = 0, column = 1, sticky = 'NS')
-        self.Menu.grid(row = 0, sticky = 'NS', pady = (0,5))
+        self.Menu.grid(row = 0, sticky = 'NSWE', pady = (0,2))
         
         self.SearchTools = SearchTools(sidebar, self.search)
-        self.SearchTools.grid(row = 1, sticky = 'NS', pady = 5)
+        self.SearchTools.grid(row = 1, sticky = 'NSWE', pady = 2)
         
         self.LCTools = PlotTools(sidebar, 'Lightcurve')
-        self.LCTools.grid(row = 2, sticky = 'NS', pady = 5)
+        self.LCTools.grid(row = 2, sticky = 'NSWE', pady = 2)
         
-        self.ASTools = PlotTools(sidebar, 'Amplitude Spectrum')
-        self.ASTools.grid(row = 3, sticky = 'NS', pady = 5)
+        self.ASTools = PlotTools(sidebar, 'Amp Spectrum')
+        self.ASTools.grid(row = 3, sticky = 'NSWE', pady = 2)
         self.ASTools.percentbox()
-        
-        self.plotupdate = tk.Button(sidebar, text = 'Update', command = self.updatePlot)#, command = self.updatePlot)
-        self.plotupdate.grid(row = 4, pady = 5)
         
         self.Display = Display(sidebar)
         #self.Display.grid(row = 1, column = 1, sticky = 'NS')
-        self.Display.grid(row = 5, sticky = 'NS', pady = 5)
+        self.Display.grid(row = 5, sticky = 'NSWE', pady = 2)
         
         #self.columnconfigure(0, weight = 10)
         #self.rowconfigure(0, weight = 10)
@@ -492,6 +527,13 @@ class MainApp(tk.Tk):
         file = self.Menu.selectedFile()
         self.plot(file[0], file[1])
         self.Display.init(file[0], file[1])
+    
+    def showAllInfo(self):
+        file = self.Menu.selectedFile()
+        displaywin = tk.Toplevel()
+        display = Display(displaywin)
+        display.pack()
+        display.allinf(file[0], file[1])
     
     def search(self):
         
@@ -682,6 +724,7 @@ class MainApp(tk.Tk):
         self.CanvasA_LS.f.canvas.draw()
         #self.Canvas.flc.canvas.draw()
         #self.Canvas.fas.canvas.draw()
+
     
     def temphist(self):
         self.histogram('TEFF', False)
@@ -988,23 +1031,23 @@ class MainApp(tk.Tk):
                         pass
                     page.append(pypdf2.PdfFileReader(figpdf))
                     page.write('k2data.pdf')
-'''
+
 def win_closed():    
     print("Exiting...")
     app.destroy()
+    
+    print('Saving flags...')
+    
+    newflags = np.array([])
+    for i in stars:
+        n = starlist[i][2]
+        newflags = np.append(newflags, n)
+    
+    np.save('etc/flagarray.npy', newflags)
+    
     sys.exit()
-'''
 
 app = MainApp()
-app.tk.call('tk', 'scaling', 2.0)
-#app.protocol("WM_DELETE_WINDOW", win_closed)
+#app.tk.call('tk', 'scaling', 2.0)
+app.protocol("WM_DELETE_WINDOW", win_closed)
 app.mainloop()
-
-print('Saving flags...')
-
-newflags = np.array([])
-for i in stars:
-    n = starlist[i][2]
-    newflags = np.append(newflags, n)
-
-np.save('etc/flagarray.npy', newflags)
