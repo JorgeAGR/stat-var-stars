@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter
 from matplotlib.backends.backend_pdf import PdfPages
-#import PyPDF2 as pypdf2
+import PyPDF2 as pypdf2
 
 #mpl.use('PDF')
 
