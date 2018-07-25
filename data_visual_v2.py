@@ -116,11 +116,11 @@ class PlotCanvas(tk.Frame):
         
         tk.Frame.__init__(self,parent)
         
-        self.f, self.ax = plt.subplots()
+        #self.f, self.ax = plt.subplots(figsize = (20, 3.5))
         
-        self.canvas = FigureCanvasTkAgg(self.f, self)
-        self.canvas.draw()
-        self.canvas.get_tk_widget().pack(side=tk.RIGHT,fill=tk.BOTH,expand=True)
+        #self.canvas = FigureCanvasTkAgg(self.f, self)
+        #self.canvas.draw()
+        #self.canvas.get_tk_widget().pack(side=tk.RIGHT, fill=tk.X, expand=True)
         '''
         #Displays Matplotlib figure toolbar.
         self.toolbar = NavigationToolbar2TkAgg(self.canvas, self)
@@ -140,6 +140,47 @@ class PlotCanvas(tk.Frame):
         self.canvasas.draw()
         self.canvasas.get_tk_widget().pack(fill = tk.BOTH, expand = True)
         '''
+        self.f, self.ax = plt.subplots(2, figsize = (25, 6))
+        
+        self.axlc = self.ax[0]
+        self.axas = self.ax[1]
+        
+        self.canvas = FigureCanvasTkAgg(self.f, self)
+        self.canvas.draw()
+        self.canvas.get_tk_widget().pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
+
+class WindowCanvas(tk.Frame):
+    
+    def __init__(self,parent):
+        
+        tk.Frame.__init__(self,parent)
+        
+        self.f, self.ax = plt.subplots()
+        
+        self.canvas = FigureCanvasTkAgg(self.f, self)
+        self.canvas.draw()
+        self.canvas.get_tk_widget().pack(side=tk.RIGHT, fill=tk.X, expand=True)
+
+class TabMenu(tk.Frame): # Section of sidebar containing main option and buttons to view the other menus.
+    
+    def __init__(self,parent):
+        
+        tk.Frame.__init__(self, parent)
+        
+        tabs = tk.Frame(self)
+        tabs.grid(row = 0, sticky = tk.E+tk.W)
+        
+        tabs.columnconfigure(0, weight = 1)
+        tabs.columnconfigure(1, weight = 1)
+        
+        self.showSearch = tk.Label(tabs, text = 'Search', relief = tk.SUNKEN, width = 7)
+        self.showSearch.grid(row = 0, column = 0)
+        
+        self.showTools = tk.Label(tabs, text = 'Plot', relief = tk.RAISED, width = 7)
+        self.showTools.grid(row = 0, column = 1)
+        
+        self.showTarget = tk.Label(tabs, text = 'Info', relief = tk.RAISED, width = 7)
+        self.showTarget.grid(row = 0, column = 2)
 
 class Menu(tk.Frame):
     
@@ -242,11 +283,11 @@ class SearchTools(tk.LabelFrame):
         types.grid(row = 2)
         
         self.dsctvar = tk.BooleanVar()
-        self.dsctcheck = tk.Checkbutton(types, text = 'Delta Sct', variable = self.dsctvar)
+        self.dsctcheck = tk.Checkbutton(types, text = 'd Sct', variable = self.dsctvar)
         self.dsctcheck.grid(row = 0, column = 0, sticky = 'W')
         
         self.gdorvar = tk.BooleanVar()
-        self.gdorcheck = tk.Checkbutton(types, text = 'Gamma Dor', variable = self.gdorvar)
+        self.gdorcheck = tk.Checkbutton(types, text = 'g Dor', variable = self.gdorvar)
         self.gdorcheck.grid(row = 0, column = 1, sticky = 'W')
         
         self.binvar = tk.BooleanVar()
@@ -254,15 +295,15 @@ class SearchTools(tk.LabelFrame):
         self.bincheck.grid(row = 1, column = 0, sticky = 'W')
         
         self.dghybvar = tk.BooleanVar()
-        self.dghybcheck = tk.Checkbutton(types, text = r'D/G Hybrid', variable = self.dghybvar)
+        self.dghybcheck = tk.Checkbutton(types, text = r'd/g Hybrid', variable = self.dghybvar)
         self.dghybcheck.grid(row = 1, column = 1, sticky = 'W')
         
         self.intvar = tk.BooleanVar()
-        self.intcheck = tk.Checkbutton(types, text = 'Interesting', variable = self.intvar)
-        self.intcheck.grid(row = 2, column = 0, sticky = 'W')
+        self.intcheck = tk.Checkbutton(self, text = 'Interesting', variable = self.intvar)
+        self.intcheck.grid(row = 3, column = 0, sticky = 'W')
         
         self.searchbutton = tk.Button(self, text = 'Search', command = command)
-        self.searchbutton.grid(row = 3)
+        self.searchbutton.grid(row = 4)
 
 class PlotTools(tk.LabelFrame):
     
@@ -344,7 +385,8 @@ class Display(tk.LabelFrame): #WORK ON THIS
                              str(obj.cards[uncertaintytitle])).grid(row = i, sticky = 'W')
                     i += 1
                 else:
-                    tk.Label(self.frame, text = valuetitle + ': ' + str(obj.cards[valuetitle])).grid(row = i, sticky = 'W')
+                    if (i != 8):
+                        tk.Label(self.frame, text = valuetitle + ': ' + str(obj.cards[valuetitle])).grid(row = i, sticky = 'W')
                 if i == 33:
                     break
             else:
@@ -368,9 +410,9 @@ class Window(tk.Toplevel):
         
         tk.Toplevel.__init__(self)
         
-        self.canvas = PlotCanvas(self)
+        self.canvas = WindowCanvas(self)
         self.canvas.pack(fill=tk.BOTH, expand=True)
-        self.geometry('1000x400')
+        self.geometry('900x450')
 
 class EntryPopUp(tk.Toplevel):
     
@@ -391,8 +433,8 @@ class MainApp(tk.Tk):
         tk.Tk.wm_title(self, 'K2 Campaign Viewer')
         
         #tk.Tk.wm_aspect(self, minNumer = 1, minDenom = 2, maxNumer = 8, maxDenom = 12)
-        tk.Tk.wm_aspect(self, minNumer = 1, minDenom = 1 , maxNumer = 1 , maxDenom = 1)
-        tk.Tk.wm_geometry(self, '900x900')
+        #tk.Tk.wm_aspect(self, minNumer = 2, minDenom = 1, maxNumer = 2 , maxDenom = 1)
+        tk.Tk.wm_geometry(self, '900x600')
         
         menubar = tk.Menu(self)
         
@@ -431,14 +473,46 @@ class MainApp(tk.Tk):
         
         tk.Tk.config(self, menu = menubar)
         
+        self.Canvas = PlotCanvas(self)
+        self.Canvas.grid(row = 0, column = 0, sticky = 'NSEW')
+        
+        #plot1 = tk.Frame(self).grid(row = 0, column = 0)
+        #plot2 = tk.Frame(self).grid(row = 1, column = 0)
+        
+        self.columnconfigure(0, weight = 1)
+        
+        sidebar = tk.Frame(self)
+        sidebar.grid(row = 0, column = 4, rowspan = 2, sticky = 'NS')
+        
+        self.Menu = Menu(sidebar)
+        self.Menu.grid(row = 0, column = 0, sticky = 'NS', pady = (0,5))
+        
+        self.Tabs = TabMenu(sidebar)
+        self.Tabs.grid(row = 1, column = 0, sticky = 'NSWE', pady = 5)
+        
+        self.SearchTools = SearchTools(sidebar, self.search)
+        self.SearchTools.grid(row = 2, column = 0, sticky = 'NSWE', pady = 5)
+        
+        self.PlotTools = tk.Frame(sidebar)
+        #self.PlotTools.grid(row = 2, column = 0, sticky = 'NS', pady = 5)
+        
+        self.LCTools = PlotTools(self.PlotTools, 'Lightcurve')
+        self.LCTools.grid(row = 1, column = 0, sticky = 'NSWE', pady = 5)
+        
+        self.ASTools = PlotTools(self.PlotTools, 'Amplitude Spectrum')
+        self.ASTools.percentbox()
+        self.ASTools.grid(row = 2, column = 0, sticky = 'NSWE', pady = 5)
+        
+        self.Display = Display(sidebar)
+        #self.Display.grid(row = 2, column = 0, sticky = 'NS', pady = 5)
+        
+        '''
         plots = tk.Frame(self)
         #plots.grid(row = 0, column = 0, sticky = 'NEWS')
         plots.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
         
-        '''
-        self.Canvas = PlotCanvas(plots)
-        self.Canvas.pack(expand = True, fill = tk.BOTH)
-        '''
+        #self.Canvas = PlotCanvas(plots)
+        #self.Canvas.pack(expand = True, fill = tk.BOTH)
         
         self.CanvasLC = PlotCanvas(plots)
         #self.CanvasLC.grid(row = 0, column = 0, sticky = 'NEWS')
@@ -470,13 +544,25 @@ class MainApp(tk.Tk):
         self.plotupdate = tk.Button(sidebar, text = 'Update', command = self.updatePlot)#, command = self.updatePlot)
         self.plotupdate.grid(row = 4, pady = 5)
         
-        self.Display = Display(sidebar)
+        displayframe = tk.Frame(self)
+        displayframe.pack(side = tk.LEFT, fill = tk.Y)
+        
+        self.Display = Display(displayframe)
         #self.Display.grid(row = 1, column = 1, sticky = 'NS')
-        self.Display.grid(row = 5, sticky = 'NS', pady = 5)
+        #self.Display.grid(row = 0, column = 1, sticky = 'NS', pady = 5)
+        self.Display.pack(expand = True, fill = tk.X)
         
         #self.columnconfigure(0, weight = 10)
         #self.rowconfigure(0, weight = 10)
         #self.rowconfigure(1, weight = 10)
+        '''
+        
+        self.Tabs.showSearch.bind ("<Button-1>", lambda event, self=self, string = 'search':
+                                   self.showTab( event, string))
+        self.Tabs.showTools.bind ("<Button-1>", lambda event, self=self, string = 'tools':
+                                  self.showTab( event, string))
+        self.Tabs.showTarget.bind ("<Button-1>", lambda event, self=self, string = 'target':
+                                   self.showTab( event, string))
         
         self.Menu.list.bind('<<ListboxSelect>>', self.selectFile)
         self.bind('d', self.keyPress)
@@ -582,7 +668,9 @@ class MainApp(tk.Tk):
     
     def updateFlag(self,integer):
         self.obj.setFlag(integer)
+        print(starlist[str(self.obj.cards['EPIC'])][2])
         starlist[str(self.obj.cards['EPIC'])][2] = integer
+        print(starlist[str(self.obj.cards['EPIC'])][2])
         self.plot(self.obj.file, self.obj.flagdir)
         #self.updatePlot()
     
@@ -610,78 +698,79 @@ class MainApp(tk.Tk):
         time = time - time[0]
         aspercent = self.ASTools.percent.get() / 100
         
-        self.CanvasLC.ax.clear()
-        #self.Canvas.axlc.clear()
-        plt.figure(1)
+        #self.CanvasLC.ax.clear()
+        self.Canvas.axlc.clear()
+        #plt.figure(1)
         #self.CanvasLC.ax.
-        plt.plot(time, lc, linewidth = 1)
-        plt.title('Object ID: ' + str(self.obj.cards['EPIC']) + '   Type: ' + flag2label(int(flag)), fontsize = 14)
-        plt.xlabel('Time $(d)$')
-        plt.ylabel('Amplitude $(ppm)$')
-        plt.ticklabel_format(style = 'sci', scilimits = (0,0), axis = 'y', useMathText = False)
-        self.CanvasLC.ax.xaxis.set_major_locator(MultipleLocator(10))
-        self.CanvasLC.ax.xaxis.set_minor_locator(MultipleLocator(2))
-        #self.Canvas.axlc.xaxis.set_major_locator(MultipleLocator(10))
-        #self.Canvas.axlc.xaxis.set_minor_locator(MultipleLocator(2))
-        plt.grid()
+        self.Canvas.axlc.plot(time, lc, linewidth = 1)
+        #self.Canvas.axlc.set_title('Object ID: ' + str(self.obj.cards['EPIC']) + '   Type: ' + flag2label(int(flag)), fontsize = 12)
+        self.Canvas.axlc.set_xlabel('Time $(d)$')
+        self.Canvas.axlc.set_ylabel('Amplitude $(ppm)$')
+        self.Canvas.axlc.ticklabel_format(style = 'sci', scilimits = (0,0), axis = 'y', useMathText = False)
+        #self.CanvasLC.ax.xaxis.set_major_locator(MultipleLocator(10))
+        #self.CanvasLC.ax.xaxis.set_minor_locator(MultipleLocator(2))
+        self.Canvas.axlc.xaxis.set_major_locator(MultipleLocator(10))
+        self.Canvas.axlc.xaxis.set_minor_locator(MultipleLocator(2))
+        self.Canvas.axlc.grid()
         
         if self.LCTools.maxx.get() and self.LCTools.minx.get():
             lcmaxx = float(self.LCTools.maxx.get())
             lcminx = float(self.LCTools.minx.get())
-            plt.xlim(lcminx,lcmaxx)
+            self.Canvas.axlc.set_xlim(lcminx,lcmaxx)
         else:
-            plt.xlim(0,time[-1])
+            self.Canvas.axlc.set_xlim(0,time[-1])
         
         if self.LCTools.maxy.get() and self.LCTools.miny.get():
             lcmaxy = float(self.LCTools.maxy.get())
             lcminy = float(self.LCTools.miny.get())
-            plt.ylim(lcminy,lcmaxy)
+            self.Canvas.axlc.set_ylim(lcminy,lcmaxy)
         else:
             None#plt.ylim(-2*(np.std(lc)),2*np.std(lc))
         
-        self.CanvasA_LS.ax.clear()
-        #self.Canvas.axas.clear()
-        plt.figure(2)
+        self.Canvas.f.suptitle('Object ID: ' + str(self.obj.cards['EPIC']) + '   Type: ' + flag2label(int(flag)), fontsize = 12)
+        #self.CanvasA_LS.ax.clear()
+        self.Canvas.axas.clear()
+        #plt.figure(2)
         #self.CanvasA_LS.ax.
-        plt.plot(freq, als, linewidth = 1)
-        plt.axvline(x = 5, linestyle = ':', color = 'black')
-        plt.axvline(x = 4.075, linestyle = ':', color = 'red')
-        plt.axvline(x = 4.075*2, linestyle = ':', color = 'red')
-        plt.axvline(x = 4.075*3, linestyle = ':', color = 'red')
-        plt.axvline(x = 4.075*4, linestyle = ':', color = 'red')
-        plt.axvline(x = 4.075*5, linestyle = ':', color = 'red')
-        plt.title('Displaying ' + str(aspercent * 100) + '% of Max Amplitude')
-        plt.xlabel('Cycles per Day $(1/d)$')
-        plt.ylabel('Amplitude $(ppm)$')
-        plt.ticklabel_format(style = 'sci', scilimits = (0,0), axis = 'y', useMathText = False)
-        plt.grid()
+        self.Canvas.axas.plot(freq, als, linewidth = 1)
+        self.Canvas.axas.axvline(x = 5, linestyle = ':', color = 'black')
+        self.Canvas.axas.axvline(x = 4.075, linestyle = ':', color = 'red')
+        self.Canvas.axas.axvline(x = 4.075*2, linestyle = ':', color = 'red')
+        self.Canvas.axas.axvline(x = 4.075*3, linestyle = ':', color = 'red')
+        self.Canvas.axas.axvline(x = 4.075*4, linestyle = ':', color = 'red')
+        self.Canvas.axas.axvline(x = 4.075*5, linestyle = ':', color = 'red')
+        self.Canvas.axas.set_xlabel('Cycles per Day $(1/d)$')
+        self.Canvas.axas.set_ylabel('Amplitude $(ppm)$')
+        self.Canvas.axas.ticklabel_format(style = 'sci', scilimits = (0,0), axis = 'y', useMathText = False)
+        self.Canvas.axas.grid()
         
         if self.ASTools.maxx.get() and self.ASTools.minx.get():
             asmaxx = float(self.ASTools.maxx.get())
             asminx = float(self.ASTools.minx.get())
-            plt.xlim(asminx,asmaxx)
-            self.CanvasA_LS.ax.xaxis.set_major_locator(MultipleLocator(asmaxx/4))
-            self.CanvasA_LS.ax.xaxis.set_minor_locator(MultipleLocator(asmaxx/8))
-            #self.Canvas.axas.xaxis.set_major_locator(MultipleLocator(asmaxx/4))
-            #self.Canvas.axas.xaxis.set_minor_locator(MultipleLocator(asmaxx/8))
+            self.Canvas.axas.set_xlim(asminx,asmaxx)
+            #self.CanvasA_LS.ax.xaxis.set_major_locator(MultipleLocator(asmaxx/4))
+            #self.CanvasA_LS.ax.xaxis.set_minor_locator(MultipleLocator(asmaxx/8))
+            self.Canvas.axas.xaxis.set_major_locator(MultipleLocator(asmaxx/4))
+            self.Canvas.axas.xaxis.set_minor_locator(MultipleLocator(asmaxx/8))
         else:
-            plt.xlim(0,freq[-1])
-            self.CanvasA_LS.ax.xaxis.set_major_locator(MultipleLocator(2.5))
-            self.CanvasA_LS.ax.xaxis.set_minor_locator(MultipleLocator(0.5))
-            #self.Canvas.axas.xaxis.set_major_locator(MultipleLocator(2.5))
-            #self.Canvas.axas.xaxis.set_minor_locator(MultipleLocator(0.5))
+            self.Canvas.axas.set_xlim(0,freq[-1])
+            #self.CanvasA_LS.ax.xaxis.set_major_locator(MultipleLocator(2.5))
+            #self.CanvasA_LS.ax.xaxis.set_minor_locator(MultipleLocator(0.5))
+            self.Canvas.axas.xaxis.set_major_locator(MultipleLocator(2.5))
+            self.Canvas.axas.xaxis.set_minor_locator(MultipleLocator(0.5))
         
         if self.ASTools.maxy.get() and self.ASTools.miny.get():
             asmaxy = float(self.ASTools.maxy.get())
             asminy = float(self.ASTools.miny.get())
-            plt.ylim(asminy, asmaxy)
+            self.Canvas.axas.set_ylim(asminy, asmaxy)
         else:
-            plt.ylim(0, max(als) * aspercent)
+            self.Canvas.axas.set_ylim(0, max(als) * aspercent)
         
-        self.CanvasLC.f.canvas.draw()
-        self.CanvasA_LS.f.canvas.draw()
+        #self.CanvasLC.f.canvas.draw()
+        #self.CanvasA_LS.f.canvas.draw()
         #self.Canvas.flc.canvas.draw()
         #self.Canvas.fas.canvas.draw()
+        self.Canvas.f.canvas.draw()
     
     def temphist(self):
         self.histogram('TEFF', False)
@@ -803,6 +892,29 @@ class MainApp(tk.Tk):
                     star = f.rstrip('.fits')
                     targetlist.write('EPIC ' + star)
                     targetlist.write('\n')
+    
+    def showTab(self, event, tab):
+        if tab == 'search':
+            self.Tabs.showSearch.config(relief = tk.SUNKEN)
+            self.Tabs.showTools.config(relief = tk.RAISED)
+            self.Tabs.showTarget.config(relief = tk.RAISED)
+            self.SearchTools.grid()
+            self.PlotTools.grid_remove() 
+            self.Display.grid_remove()
+        if tab == 'tools':
+            self.Tabs.showSearch.config(relief = tk.RAISED)
+            self.Tabs.showTools.config(relief = tk.SUNKEN)
+            self.Tabs.showTarget.config(relief = tk.RAISED)
+            self.SearchTools.grid_remove()
+            self.PlotTools.grid() 
+            self.Display.grid_remove()
+        if tab == 'target':
+            self.Tabs.showSearch.config(relief = tk.RAISED)
+            self.Tabs.showTools.config(relief = tk.RAISED)
+            self.Tabs.showTarget.config(relief = tk.SUNKEN)
+            self.SearchTools.grid_remove()
+            self.PlotTools.grid_remove() 
+            self.Display.grid()
     
     def savepdf(self):
         
