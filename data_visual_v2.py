@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter
 from matplotlib.backends.backend_pdf import PdfPages
-import PyPDF2 as pypdf2
+#import PyPDF2 as pypdf2
 
 #mpl.use('PDF')
 
@@ -116,31 +116,8 @@ class PlotCanvas(tk.Frame):
         
         tk.Frame.__init__(self,parent)
         
-        #self.f, self.ax = plt.subplots(figsize = (20, 3.5))
-        
-        #self.canvas = FigureCanvasTkAgg(self.f, self)
-        #self.canvas.draw()
-        #self.canvas.get_tk_widget().pack(side=tk.RIGHT, fill=tk.X, expand=True)
-        '''
-        #Displays Matplotlib figure toolbar.
-        self.toolbar = NavigationToolbar2TkAgg(self.canvas, self)
-        self.toolbar.update()
-        self.canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-        '''
-        '''
-        self.flc, self.axlc = plt.subplots()
-        
-        self.canvaslc = FigureCanvasTkAgg(self.flc, self)
-        self.canvaslc.draw()
-        self.canvaslc.get_tk_widget().pack(fill = tk.BOTH, expand = True)
-        
-        self.fas, self.axas = plt.subplots()
-        
-        self.canvasas = FigureCanvasTkAgg(self.fas, self)
-        self.canvasas.draw()
-        self.canvasas.get_tk_widget().pack(fill = tk.BOTH, expand = True)
-        '''
         self.f, self.ax = plt.subplots(2, figsize = (25, 6))
+        plt.subplots_adjust(hspace = 0.5)
         
         self.axlc = self.ax[0]
         self.axas = self.ax[1]
@@ -148,6 +125,11 @@ class PlotCanvas(tk.Frame):
         self.canvas = FigureCanvasTkAgg(self.f, self)
         self.canvas.draw()
         self.canvas.get_tk_widget().pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
+        
+        #click = self.f.canvas.mpl_connect('scroll_event', self.onclick)
+        
+    #def onclick(self, event):
+        #print('you pressed', event.button, event.xdata, event.ydata)
 
 class WindowCanvas(tk.Frame):
     
@@ -476,9 +458,6 @@ class MainApp(tk.Tk):
         self.Canvas = PlotCanvas(self)
         self.Canvas.grid(row = 0, column = 0, sticky = 'NSEW')
         
-        #plot1 = tk.Frame(self).grid(row = 0, column = 0)
-        #plot2 = tk.Frame(self).grid(row = 1, column = 0)
-        
         self.columnconfigure(0, weight = 1)
         
         sidebar = tk.Frame(self)
@@ -503,59 +482,11 @@ class MainApp(tk.Tk):
         self.ASTools.percentbox()
         self.ASTools.grid(row = 2, column = 0, sticky = 'NSWE', pady = 5)
         
+        self.plotupdate = tk.Button(self.PlotTools, text = 'Update', command = self.updatePlot)#, command = self.updatePlot)
+        self.plotupdate.grid(row = 3, pady = 5)
+        
         self.Display = Display(sidebar)
         #self.Display.grid(row = 2, column = 0, sticky = 'NS', pady = 5)
-        
-        '''
-        plots = tk.Frame(self)
-        #plots.grid(row = 0, column = 0, sticky = 'NEWS')
-        plots.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
-        
-        #self.Canvas = PlotCanvas(plots)
-        #self.Canvas.pack(expand = True, fill = tk.BOTH)
-        
-        self.CanvasLC = PlotCanvas(plots)
-        #self.CanvasLC.grid(row = 0, column = 0, sticky = 'NEWS')
-        self.CanvasLC.pack(expand = True, fill = tk.BOTH)
-        
-        self.CanvasA_LS = PlotCanvas(plots)
-        #self.CanvasA_LS.grid(row = 1, column = 0, sticky = 'NEWS')
-        self.CanvasA_LS.pack(expand = True, fill = tk.BOTH)
-        
-        
-        sidebar = tk.Frame(self)
-        #sidebar.grid(row = 0, column = 1, sticky = 'NS')
-        sidebar.pack(side = tk.LEFT, fill = tk.Y)
-        
-        self.Menu = Menu(sidebar)
-        #self.Menu.grid(row = 0, column = 1, sticky = 'NS')
-        self.Menu.grid(row = 0, sticky = 'NS', pady = (0,5))
-        
-        self.SearchTools = SearchTools(sidebar, self.search)
-        self.SearchTools.grid(row = 1, sticky = 'NS', pady = 5)
-        
-        self.LCTools = PlotTools(sidebar, 'Lightcurve')
-        self.LCTools.grid(row = 2, sticky = 'NS', pady = 5)
-        
-        self.ASTools = PlotTools(sidebar, 'Amplitude Spectrum')
-        self.ASTools.grid(row = 3, sticky = 'NS', pady = 5)
-        self.ASTools.percentbox()
-        
-        self.plotupdate = tk.Button(sidebar, text = 'Update', command = self.updatePlot)#, command = self.updatePlot)
-        self.plotupdate.grid(row = 4, pady = 5)
-        
-        displayframe = tk.Frame(self)
-        displayframe.pack(side = tk.LEFT, fill = tk.Y)
-        
-        self.Display = Display(displayframe)
-        #self.Display.grid(row = 1, column = 1, sticky = 'NS')
-        #self.Display.grid(row = 0, column = 1, sticky = 'NS', pady = 5)
-        self.Display.pack(expand = True, fill = tk.X)
-        
-        #self.columnconfigure(0, weight = 10)
-        #self.rowconfigure(0, weight = 10)
-        #self.rowconfigure(1, weight = 10)
-        '''
         
         self.Tabs.showSearch.bind ("<Button-1>", lambda event, self=self, string = 'search':
                                    self.showTab( event, string))
@@ -563,6 +494,8 @@ class MainApp(tk.Tk):
                                   self.showTab( event, string))
         self.Tabs.showTarget.bind ("<Button-1>", lambda event, self=self, string = 'target':
                                    self.showTab( event, string))
+        
+        self.Canvas.f.canvas.mpl_connect('scroll_event', self.onscroll)
         
         self.Menu.list.bind('<<ListboxSelect>>', self.selectFile)
         self.bind('d', self.keyPress)
@@ -684,10 +617,6 @@ class MainApp(tk.Tk):
         self.ASTools.clearEntries()
     
     def plot(self, file, flagdir):#, lcx, lcy, asx, asy):
-        
-        # Maybe use Object class to manage all this file info
-        #file = 'k2c'+ self.Menu.campaign_dic[self.Menu.campaign_str.get()] + '/data/' + self.Menu.list.get(tk.ACTIVE)
-        
         self.obj = Object(file, flagdir)
         time = self.obj.cards['TIME']
         lc = self.obj.cards['LC']
@@ -698,21 +627,15 @@ class MainApp(tk.Tk):
         time = time - time[0]
         aspercent = self.ASTools.percent.get() / 100
         
-        #self.CanvasLC.ax.clear()
+        self.Canvas.f.suptitle('Object ID: ' + str(self.obj.cards['EPIC']) + '   Type: ' + flag2label(int(flag)), fontsize = 12)
         self.Canvas.axlc.clear()
-        #plt.figure(1)
-        #self.CanvasLC.ax.
-        self.Canvas.axlc.plot(time, lc, linewidth = 1)
-        #self.Canvas.axlc.set_title('Object ID: ' + str(self.obj.cards['EPIC']) + '   Type: ' + flag2label(int(flag)), fontsize = 12)
+        self.Canvas.axlc.plot(time, lc, linewidth = 0.50)
         self.Canvas.axlc.set_xlabel('Time $(d)$')
         self.Canvas.axlc.set_ylabel('Amplitude $(ppm)$')
         self.Canvas.axlc.ticklabel_format(style = 'sci', scilimits = (0,0), axis = 'y', useMathText = False)
-        #self.CanvasLC.ax.xaxis.set_major_locator(MultipleLocator(10))
-        #self.CanvasLC.ax.xaxis.set_minor_locator(MultipleLocator(2))
         self.Canvas.axlc.xaxis.set_major_locator(MultipleLocator(10))
         self.Canvas.axlc.xaxis.set_minor_locator(MultipleLocator(2))
         self.Canvas.axlc.grid()
-        
         if self.LCTools.maxx.get() and self.LCTools.minx.get():
             lcmaxx = float(self.LCTools.maxx.get())
             lcminx = float(self.LCTools.minx.get())
@@ -725,21 +648,18 @@ class MainApp(tk.Tk):
             lcminy = float(self.LCTools.miny.get())
             self.Canvas.axlc.set_ylim(lcminy,lcmaxy)
         else:
-            None#plt.ylim(-2*(np.std(lc)),2*np.std(lc))
+            None
         
-        self.Canvas.f.suptitle('Object ID: ' + str(self.obj.cards['EPIC']) + '   Type: ' + flag2label(int(flag)), fontsize = 12)
-        #self.CanvasA_LS.ax.clear()
         self.Canvas.axas.clear()
-        #plt.figure(2)
-        #self.CanvasA_LS.ax.
-        self.Canvas.axas.plot(freq, als, linewidth = 1)
+        self.Canvas.axas.set_title('Displaying ' + str(aspercent * 100) + '% of Max Amplitude', fontsize = 10)
+        self.Canvas.axas.plot(freq, als, linewidth = 0.50)
         self.Canvas.axas.axvline(x = 5, linestyle = ':', color = 'black')
         self.Canvas.axas.axvline(x = 4.075, linestyle = ':', color = 'red')
         self.Canvas.axas.axvline(x = 4.075*2, linestyle = ':', color = 'red')
         self.Canvas.axas.axvline(x = 4.075*3, linestyle = ':', color = 'red')
         self.Canvas.axas.axvline(x = 4.075*4, linestyle = ':', color = 'red')
         self.Canvas.axas.axvline(x = 4.075*5, linestyle = ':', color = 'red')
-        self.Canvas.axas.set_xlabel('Cycles per Day $(1/d)$')
+        self.Canvas.axas.set_xlabel('Frequency $(c/d)$')
         self.Canvas.axas.set_ylabel('Amplitude $(ppm)$')
         self.Canvas.axas.ticklabel_format(style = 'sci', scilimits = (0,0), axis = 'y', useMathText = False)
         self.Canvas.axas.grid()
@@ -748,14 +668,10 @@ class MainApp(tk.Tk):
             asmaxx = float(self.ASTools.maxx.get())
             asminx = float(self.ASTools.minx.get())
             self.Canvas.axas.set_xlim(asminx,asmaxx)
-            #self.CanvasA_LS.ax.xaxis.set_major_locator(MultipleLocator(asmaxx/4))
-            #self.CanvasA_LS.ax.xaxis.set_minor_locator(MultipleLocator(asmaxx/8))
             self.Canvas.axas.xaxis.set_major_locator(MultipleLocator(asmaxx/4))
             self.Canvas.axas.xaxis.set_minor_locator(MultipleLocator(asmaxx/8))
         else:
             self.Canvas.axas.set_xlim(0,freq[-1])
-            #self.CanvasA_LS.ax.xaxis.set_major_locator(MultipleLocator(2.5))
-            #self.CanvasA_LS.ax.xaxis.set_minor_locator(MultipleLocator(0.5))
             self.Canvas.axas.xaxis.set_major_locator(MultipleLocator(2.5))
             self.Canvas.axas.xaxis.set_minor_locator(MultipleLocator(0.5))
         
@@ -766,10 +682,6 @@ class MainApp(tk.Tk):
         else:
             self.Canvas.axas.set_ylim(0, max(als) * aspercent)
         
-        #self.CanvasLC.f.canvas.draw()
-        #self.CanvasA_LS.f.canvas.draw()
-        #self.Canvas.flc.canvas.draw()
-        #self.Canvas.fas.canvas.draw()
         self.Canvas.f.canvas.draw()
     
     def temphist(self):
@@ -916,16 +828,47 @@ class MainApp(tk.Tk):
             self.PlotTools.grid_remove() 
             self.Display.grid()
     
+    def onscroll(self, event):
+        print('you pressed', event.button,
+              event.xdata, event.ydata, event.step, event.inaxes)
+        x, y = event.xdata, event.ydata
+        
+        if event.inaxes == self.Canvas.axlc:
+            axes = self.Canvas.axlc
+            xdata = self.obj.cards['TIME']
+            xdata = xdata - xdata[0]
+            
+        if event.inaxes == self.Canvas.axas:
+            axes = self.Canvas.axas
+            xdata = self.obj.cards['FREQS']
+            
+        #if event.inaxes == self.Canvas.axlc:
+        xmin, xmax = axes.get_xlim()
+        zoom = 0.5 ** event.step
+        #zmin = (x/xmax * 0.5) 
+        xrange = (xmax - xmin) / 2
+        xmin = x - xrange * zoom
+        xmax = x + xrange * zoom
+        if xmin < xdata[0]:
+            xmin = 0
+        if xmax > xdata[-1]:
+            xmax = xdata[-1]
+        if xmax > xmin:
+            axes.set_xlim(xmin, xmax)
+            self.Canvas.f.canvas.draw()
+            
+            #ix = np.floor(x * len(time))
+    
     def savepdf(self):
         
         # Check if file exists. If not, create
         try:
-            with open('k2data.pdf', 'r') as check:
+            with open('k2data.pdf', 'r'):
                 pass
         except:
-            with open('k2data.pdf', 'w+') as create:
+            with open('k2data.pdf', 'w+'):
                 pass
-        
+        return
         for f in self.Menu.filelist:
             
             file = 'k2c'+ self.Menu.campaign_dic[self.Menu.campaign_str.get()] + '/data/' + f
@@ -947,7 +890,7 @@ class MainApp(tk.Tk):
             
             time = time - time[0]
             
-            ax0.plot(time, lc, linewidth = 1)
+            ax0.plot(time, lc, linewidth = 0.5)
             ax0.set_title('Object ID: ' + str(self.obj.cards['EPIC']) + '   Type: ' + flag2label(int(flag)), fontsize = 12)
             ax0.set_xlabel('Time $(d)$', fontsize = 10)
             ax0.set_ylabel('Amplitude $(ppm)$', fontsize = 10)
@@ -972,7 +915,7 @@ class MainApp(tk.Tk):
             else:
                 None
             
-            ax1.plot(freq, als, linewidth = 1)
+            ax1.plot(freq, als, linewidth = 0.5)
             ax1.axvline(x = 5, linestyle = ':', color = 'black')
             ax1.axvline(x = 4.075, linestyle = ':', color = 'red')
             ax1.axvline(x = 4.075*2, linestyle = ':', color = 'red')
@@ -981,7 +924,7 @@ class MainApp(tk.Tk):
             ax1.axvline(x = 4.075*5, linestyle = ':', color = 'red')
             ax1.set_ylim(0,None)
             ax1.set_title('Displaying ' + str(aspercent * 100) + '% of Max Amplitude', fontsize = 10)
-            ax1.set_xlabel('Cycles per Day $(1/d)$', fontsize = 10)
+            ax1.set_xlabel('Frequency $(c/d)$', fontsize = 10)
             ax1.set_ylabel('Amplitude $(ppm)$', fontsize = 10)
             ax1.ticklabel_format(style = 'sci', scilimits = (0,0), axis = 'y', useMathText = False)
             ax1.tick_params(axis = 'both', which = 'both', labelsize = 8)
