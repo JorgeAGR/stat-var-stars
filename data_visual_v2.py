@@ -6,6 +6,7 @@ for human analysis purpose
 import matplotlib as mpl
 mpl.use('TkAgg')
 import tkinter as tk
+from tkinter import messagebox
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
 import os
 import sys
@@ -16,7 +17,8 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter
 from matplotlib.backends.backend_pdf import PdfPages
-#import PyPDF2 as pypdf2
+import PyPDF2 as pypdf2
+import pandas as pd
 
 #mpl.use('PDF')
 
@@ -421,8 +423,9 @@ class MainApp(tk.Tk):
         menubar = tk.Menu(self)
         
         filemenu = tk.Menu(menubar, tearoff = 0)
-        filemenu.add_command(label = 'Save Target List', command = self.savelist)
+        filemenu.add_command(label = 'Save Target FFT', command = self.saveampls)
         filemenu.add_command(label = "Save As PDF", command = self.savepdf)
+        filemenu.add_command(label = 'Save Campaign EPIC IDs', command = self.savelist)
         filemenu.add_separator()
         filemenu.add_command(label = "Exit", command=quit)
         menubar.add_cascade(label = "File", menu=filemenu)
@@ -494,8 +497,10 @@ class MainApp(tk.Tk):
                                   self.showTab( event, string))
         self.Tabs.showTarget.bind ("<Button-1>", lambda event, self=self, string = 'target':
                                    self.showTab( event, string))
+        self.SearchTools.searchbar.bind ("<Return>", self.quickplot)
         
         self.Canvas.f.canvas.mpl_connect('scroll_event', self.onscroll)
+        self.Canvas.f.canvas.mpl_connect('button_press_event', self.onclick)
         
         self.Menu.list.bind('<<ListboxSelect>>', self.selectFile)
         self.bind('d', self.keyPress)
@@ -511,6 +516,32 @@ class MainApp(tk.Tk):
         file = self.Menu.selectedFile()
         self.plot(file[0], file[1])
         self.Display.init(file[0], file[1])
+    
+    def quickplot(self, event):
+        # MAKE THIS LOOK THROUGH ALL CAMPAIGNS. EZ TO DO BY KNOWING THE START/END IDS FOR EACH CAMPAIGN.
+        # DOESNT OWRK>>???? DO IT MANUALLY@!!!!
+        search = self.SearchTools.searchbar.get()
+        
+        for c in self.Menu.campaign_nums:
+            directory = 'k2c' + c + '/data/'
+            targets = np.sort(os.listdir(directory))
+            if targets != []:
+                target = np.int(targets[-1][:9])
+                if np.int(search) > target:
+                    continue
+                else:
+                    if search in targets:
+                        campaign = c
+        
+        #campaign = self.Menu.campaign_dic[self.Menu.campaign_str.get()]
+        if search != '':
+            #try:
+            file = 'k2c'+ campaign + '/data/' + search + '.fits'
+            flagdir = 'k2c' + campaign + '/flags/' + search + '.txt'
+            self.plot(file, flagdir)
+            self.Display.init(file, flagdir)
+            #except:
+            #    messagebox.showerror('Error','Invalid EPIC ID')
     
     def search(self):
         
@@ -601,15 +632,9 @@ class MainApp(tk.Tk):
     
     def updateFlag(self,integer):
         self.obj.setFlag(integer)
-        print(starlist[str(self.obj.cards['EPIC'])][2])
         starlist[str(self.obj.cards['EPIC'])][2] = integer
-        print(starlist[str(self.obj.cards['EPIC'])][2])
         self.plot(self.obj.file, self.obj.flagdir)
         #self.updatePlot()
-    
-    def test(self):
-        print(float(self.LCTools.maxx.get()) == 5)
-        print('test')
     
     def updatePlot(self):
         self.plot(self.obj.file, self.obj.flagdir)
@@ -829,9 +854,9 @@ class MainApp(tk.Tk):
             self.Display.grid()
     
     def onscroll(self, event):
-        print('you pressed', event.button,
-              event.xdata, event.ydata, event.step, event.inaxes)
-        x, y = event.xdata, event.ydata
+        #print('you pressed', event.button,
+        #      event.xdata, event.ydata, event.step, event.inaxes)
+        x = event.xdata
         
         if event.inaxes == self.Canvas.axlc:
             axes = self.Canvas.axlc
@@ -845,10 +870,10 @@ class MainApp(tk.Tk):
         #if event.inaxes == self.Canvas.axlc:
         xmin, xmax = axes.get_xlim()
         zoom = 0.5 ** event.step
-        #zmin = (x/xmax * 0.5) 
         xrange = (xmax - xmin) / 2
         xmin = x - xrange * zoom
         xmax = x + xrange * zoom
+        
         if xmin < xdata[0]:
             xmin = 0
         if xmax > xdata[-1]:
@@ -856,8 +881,39 @@ class MainApp(tk.Tk):
         if xmax > xmin:
             axes.set_xlim(xmin, xmax)
             self.Canvas.f.canvas.draw()
+         
+    def onclick(self, event):
+		
+        if event.inaxes == self.Canvas.axlc:
+            lc = self.obj.cards['LC']
+            lcmin, lcmax = self.Canvas.axlc.get_ylim()
+            if (event.button == 1) and (lcmax > (max(lc) * 0.1)) and (lcmin < (min(lc) * 0.1)):
+                zoom = 0.1
+            elif event.button == 3:
+                zoom = -0.1
+            lcmax = lcmax - max(lc) * zoom
+            lcmin = lcmin - min(lc) * zoom
+            self.Canvas.axlc.set_ylim(lcmin, lcmax)
             
-            #ix = np.floor(x * len(time))
+        elif event.inaxes == self.Canvas.axas:
+            als = self.obj.cards['AMP_LOMBSCARG']
+            aspercent = self.ASTools.percent.get()
+            if (event.button == 1) and (aspercent < 100):
+                aspercent += 10
+            if (event.button == 3) and (aspercent > 0):
+                aspercent += -10
+            self.Canvas.axas.set_title('Displaying ' + str(aspercent) + '% of Max Amplitude', fontsize = 10)
+            self.Canvas.axas.set_ylim(0, max(als) * aspercent / 100)
+            self.ASTools.percent.set(aspercent)
+        
+        self.Canvas.f.canvas.draw()
+    
+    def saveampls(self):
+        #data = {'amps': self.obj.cards['AMP_LOMBSCARG'], 'freqs': self.obj.cards['FREQS']}
+        df = pd.DataFrame()
+        df['freqs'] = self.obj.cards['FREQS']
+        df['amps'] = self.obj.cards['AMP_LOMBSCARG']
+        df.to_csv(str(self.obj.cards['EPIC']) + '_fft.csv', index = False)
     
     def savepdf(self):
         
