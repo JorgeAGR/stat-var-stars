@@ -13,6 +13,7 @@ import sys
 import csv
 from astropy.io import fits
 import numpy as np
+import subprocess
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter
@@ -399,12 +400,34 @@ class Window(tk.Toplevel):
         self.geometry('900x450')
 
 class EntryPopUp(tk.Toplevel):
-    
+    # Find way to close this once filename set. Then use that to generate PDF. 
     def __init__(self):
         
         tk.Toplevel.__init__(self)
+        self.attributes('-topmost', 'true')
+        #self.geometry('200x150')
         
-        self.title()
+        text = tk.Label(self, text = 'Save file as...')
+        text.grid(row = 0, column = 0, sticky = 'NSWE', padx = 3)
+        
+        self.input = tk.StringVar()
+        self.entry = tk.Entry(self, width = 20, textvariable = self.input )
+        self.entry.grid(row = 1, column = 0, sticky = 'NSWE', padx = 3)
+        
+        opts = ['Current Target', 'Campaign Target List']
+        
+        self.criteria = tk.StringVar()
+        self.criteria.set(opts[1])
+        optmen = tk.OptionMenu(self, self.criteria, *opts)
+        optmen.grid(row = 2, column = 0, sticky = 'WE', padx = 3)
+        
+        close = tk.Button(self, text = 'Save', command = self.close_window)
+        close.grid(row = 3, column = 0, sticky = 'WE', padx = 3)
+    
+    def close_window(self):
+        self.input = self.input.get()
+        self.criteria = self.criteria.get()
+        self.destroy()
 
 # == Main Class == #
     
@@ -423,9 +446,13 @@ class MainApp(tk.Tk):
         menubar = tk.Menu(self)
         
         filemenu = tk.Menu(menubar, tearoff = 0)
-        filemenu.add_command(label = 'Save Target FFT', command = self.saveampls)
+        
+        targetmenu = tk.Menu(filemenu, tearoff = 0)
+        targetmenu.add_command(label = 'Save Target FFT', command = self.saveampls)
+        filemenu.add_cascade(label = 'Current Target', menu=targetmenu)
+        
         filemenu.add_command(label = "Save As PDF", command = self.savepdf)
-        filemenu.add_command(label = 'Save Campaign EPIC IDs', command = self.savelist)
+        filemenu.add_command(label = 'Save EPIC IDs', command = self.savelist)
         filemenu.add_separator()
         filemenu.add_command(label = "Exit", command=quit)
         menubar.add_cascade(label = "File", menu=filemenu)
@@ -497,7 +524,7 @@ class MainApp(tk.Tk):
                                   self.showTab( event, string))
         self.Tabs.showTarget.bind ("<Button-1>", lambda event, self=self, string = 'target':
                                    self.showTab( event, string))
-        self.SearchTools.searchbar.bind ("<Return>", self.quickplot)
+        self.SearchTools.searchbar.bind ("<Return>", self.quickplot_event)
         
         self.Canvas.f.canvas.mpl_connect('scroll_event', self.onscroll)
         self.Canvas.f.canvas.mpl_connect('button_press_event', self.onclick)
@@ -517,20 +544,26 @@ class MainApp(tk.Tk):
         self.plot(file[0], file[1])
         self.Display.init(file[0], file[1])
     
-    def quickplot(self, event):
+    def quickplot_event(self, event):
+        self.quickplot()
+    
+    def quickplot(self):
         # MAKE THIS LOOK THROUGH ALL CAMPAIGNS. EZ TO DO BY KNOWING THE START/END IDS FOR EACH CAMPAIGN.
         # DOESNT OWRK>>???? DO IT MANUALLY@!!!!
         search = self.SearchTools.searchbar.get()
         
+        if '.fits' in search:
+            search = search.rstrip('.fits')
+        
         for c in self.Menu.campaign_nums:
             directory = 'k2c' + c + '/data/'
-            targets = np.sort(os.listdir(directory))
+            targets = list(np.sort(os.listdir(directory)))
             if targets != []:
                 target = np.int(targets[-1][:9])
                 if np.int(search) > target:
                     continue
                 else:
-                    if search in targets:
+                    if (search + '.fits') in targets:
                         campaign = c
         
         #campaign = self.Menu.campaign_dic[self.Menu.campaign_str.get()]
@@ -559,6 +592,11 @@ class MainApp(tk.Tk):
                 return val
         
         search = self.SearchTools.searchbar.get()
+        
+        if search:
+            if '.fits' in search:
+                search = search.rstrip('.fits')
+            self.quickplot()
         
         minteff = self.SearchTools.minteff.get()
         maxteff = self.SearchTools.maxteff.get()
@@ -591,11 +629,12 @@ class MainApp(tk.Tk):
                     if star[2] != i:
                         axe = True
                         #rm.append(f)
-            if search:
-                if search not in f:
-                    axe = True
+            #if search:
+                #self.quickplot()
+                #if search not in f:
+                    #axe = True
                     #rm.append(f)
-            elif minteff or maxteff:
+            if minteff or maxteff:
                 if not check(minteff, maxteff, str2float(star[0], True)):
                     axe = True
                     #rm.append(f)
@@ -898,10 +937,10 @@ class MainApp(tk.Tk):
         elif event.inaxes == self.Canvas.axas:
             als = self.obj.cards['AMP_LOMBSCARG']
             aspercent = self.ASTools.percent.get()
-            if (event.button == 1) and (aspercent < 100):
-                aspercent += 10
-            if (event.button == 3) and (aspercent > 0):
+            if (event.button == 1) and (aspercent > 10):
                 aspercent += -10
+            if (event.button == 3) and (aspercent < 100):
+                aspercent += 10
             self.Canvas.axas.set_title('Displaying ' + str(aspercent) + '% of Max Amplitude', fontsize = 10)
             self.Canvas.axas.set_ylim(0, max(als) * aspercent / 100)
             self.ASTools.percent.set(aspercent)
@@ -916,16 +955,28 @@ class MainApp(tk.Tk):
         df.to_csv(str(self.obj.cards['EPIC']) + '_fft.csv', index = False)
     
     def savepdf(self):
+        popup = EntryPopUp()
+        self.wait_window(popup)
         
+        pdf = popup.input
+        if '.pdf' not in pdf:
+            pdf = pdf + '.pdf'
+        
+        criteria = popup.criteria
         # Check if file exists. If not, create
         try:
-            with open('k2data.pdf', 'r'):
+            with open(pdf, 'r'):
                 pass
         except:
-            with open('k2data.pdf', 'w+'):
+            with open(pdf, 'w+'):
                 pass
-        return
-        for f in self.Menu.filelist:
+        
+        if criteria == 'Current Target':
+            filelist = [str(self.obj.cards['EPIC']) + '.fits']
+        elif criteria == 'Campaign Target List':
+            filelist = self.Menu.filelist
+        
+        for f in filelist:
             
             file = 'k2c'+ self.Menu.campaign_dic[self.Menu.campaign_str.get()] + '/data/' + f
             flagdir = 'k2c' + self.Menu.campaign_dic[self.Menu.campaign_str.get()] + '/flags/' + f[0:9] + '.txt'
@@ -1085,12 +1136,12 @@ class MainApp(tk.Tk):
                     if i == 32:
                         break
             
-            with PdfPages('lastfig.pdf') as pdf:
-                pdf.savefig(fig)
+            with PdfPages('lastfig.pdf') as figpdf:
+                figpdf.savefig(fig)
             
             plt.close(fig)
             
-            with open('k2data.pdf', 'rb') as mainpdf:
+            with open(pdf, 'rb') as mainpdf:
                 with open('lastfig.pdf', 'rb') as figpdf:
                     page = pypdf2.PdfFileMerger()
                     try:
@@ -1098,7 +1149,8 @@ class MainApp(tk.Tk):
                     except:
                         pass
                     page.append(pypdf2.PdfFileReader(figpdf))
-                    page.write('k2data.pdf')
+                    page.write(pdf)
+        subprocess.call(['rm', 'lastfig.pdf'])
 
 def exiting():
     print('Saving flags...')

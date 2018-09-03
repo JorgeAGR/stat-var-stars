@@ -1,3 +1,8 @@
 #!/bin/bash
 
-#coming soon...
+cd k2c15/k2fits/
+
+wget -q -nH --cut-dirs=6 -r -l0 -c -N -np -R 'index*' -erobots=off http://archive.stsci.edu/pub/k2/lightcurves/c15/249600000/47000/ktwo249647239-c15_llc.fits
+wget -q -nH --cut-dirs=6 -r -l0 -c -N -np -R 'index*' -erobots=off http://archive.stsci.edu/pub/k2/lightcurves/c15/249700000/99000/ktwo249799715-c15_llc.fits
+wget -q -nH --cut-dirs=6 -r -l0 -c -N -np -R 'index*' -erobots=off http://archive.stsci.edu/pub/k2/lightcurves/c15/249800000/35000/ktwo249835410-c15_llc.fits
+

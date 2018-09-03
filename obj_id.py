@@ -33,13 +33,22 @@ class CampaignManager(object):
                 
         dl = False
         for c in opts['catalogs']:
-            catalog = 'epic-catalog/epic_' + c + '_27Feb2018.txt'
+            catalog = 'epic-catalog/epic_' + c + '_06July2018.txt'
             if not os.path.isfile(catalog):
                 dl = True
                 break
         if dl:
-            print('Downloading EPIC Catalog...')
+            print('Downloading most recent EPIC files...')
             subprocess.run('epic-catalog/epic_ctlg_dl')
+            for file in os.listdir('epic-catalog'):
+                if 'epic_' and '.txt' in file:
+                    try:
+                        int(file[5])
+                        if '06July2018' not in file:
+                            subprocess.call(['rm', 'epic-catalog/' + file])
+                    except:
+                        pass
+                        
         
         print('\nDeveloped by: Jorge A. Garcia @ New Mexico State University')
         
