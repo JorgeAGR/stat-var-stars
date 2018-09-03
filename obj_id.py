@@ -242,17 +242,17 @@ class ObjectID(object):
                 self.E_EBV = 'N/A'
         
         if 210000000 >= self.EPIC >= 201000001:
-            filename = 'epic_1_27Feb2018.txt'
+            filename = 'epic_1_06July2018.txt'
         elif 220000000 >= self.EPIC >= 210000001:
-            filename = 'epic_2_27Feb2018.txt'
+            filename = 'epic_2_06July2018.txt'
         elif 230000000 >= self.EPIC >= 220000001:
-            filename = 'epic_3_27Feb2018.txt'
+            filename = 'epic_3_06July2018.txt'
         elif 240000000 >= self.EPIC >= 230000001:
-            filename = 'epic_4_27Feb2018.txt'
+            filename = 'epic_4_06July2018.txt'
         elif 250000000 >= self.EPIC >= 240000001:
-            filename = 'epic_5_27Feb2018.txt'
+            filename = 'epic_5_06July2018.txt'
         elif 251809654 >= self.EPIC >= 250000001:
-            filename = 'epic_6_27Feb2018.txt'
+            filename = 'epic_6_06July2018.txt'
         
         try:
             with open('epic-catalog/' + filename) as file:
