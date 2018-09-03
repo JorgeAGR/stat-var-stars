@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd k2c15/k2fits/
+cd k2c17/k2fits/
 
 wget -q -nH --cut-dirs=6 -r -l0 -c -N -np -R 'index*' -erobots=off http://archive.stsci.edu/pub/k2/lightcurves/c17/212300000/98000/ktwo212398212-c17_llc.fits
 wget -q -nH --cut-dirs=6 -r -l0 -c -N -np -R 'index*' -erobots=off http://archive.stsci.edu/pub/k2/lightcurves/c17/212400000/06000/ktwo212406696-c17_llc.fits
