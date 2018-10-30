@@ -76,8 +76,8 @@ Enter campaign(s) to be downloaded: '''
                     for c in os.listdir():
                         if 'k2c' in c:
                             if os.listdir(c + '/k2fits/') == []:
-                                print('Downloading Campaign ' + campaign.lstrip('k2c') + '...')
-                                subprocess.run('epic-catalog/'+ campaign)
+                                print('Downloading Campaign ' + c + '...')
+                                subprocess.run('epic-catalog/'+ c)
                             else:
                                 print('Campaign ' + campaign.lstrip('k2c') + ' already downloaded!')
                 elif len(campaign) > 2:

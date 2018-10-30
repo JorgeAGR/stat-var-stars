@@ -1,0 +1,104 @@
+== Campaign 4 ==
+
+** 211018096:
++ Probably a DS
+- Plenty of references, but not recognized as a DS?
+
+** 211044267:
+++ Known DS
+++ Many references
+
+** 211080847:
++ Probably a DS
+- Plenty of references, but not recognized as a DS?
+
+== Campaign 5 ==
+** 211909987:
++ Probably a DS
+- Plenty of references, but not recognized as a DS?
+
+** 211935741:
+++ Known DS
+++ Many references
+
+(!) 211936163:
++ Could be a DS
+  - But Simbad says its a Spectroscopic Binary?
+- Plenty of references
+-! Look for TPF examples of a spectroscopic binary from the binary candidates
+
+** 211945791:
+++ Known DS
+++ Many references
+
+** 211957791:
+++ Known DS
+++ Many references
+
+** 212008515:
+++ Known DS
+++ Many references
+
+== Campaign 6 ==
+
+** 212792450:
++ Probably a DS
+- Not much info in Simbad
+
+== Campaign 7 ==
+
+(!) 213674056:
+- Probably not a DS
+- Not much info in Simbad
+
+** 214404873:
++ Probly a DS
+- Not much info in Simbad
+
+(!) 214436324:
++ Could be a DS, but contaminated by another star?
++ No info on Simbad from EPIC or 2MASS
+
+** 215076557:
++ Probably a DS
+- Not much info in Simbad
+
+(!) 215584718:
+- 4 very distinct frequencies though.
+- Probably not a DS? Should show to Dr. J none the less
+
+** 216308801:
++ Probably a DS
+- Not much info in Simbad
+
+** 216477445:
++ Probably a DS
++ No info on Simbad from EPIC or 2MASS
+
+** 217597196:
++ Probably a DS
+- Not much info on Simbad
+
+** 218942345:
++ Probably a DS
+- Not much info on Simbad
+
+** 219062123:
++ Probably a DS
+- Not much info on Simbad
+
+== Campaign 8 ==
+
+** 220582710:
++ Probably a DS
+- Not much info on Simbad
+
+== Campaign 10 ==
+(!) Check PS with part of the lightcurve that doesn't cut out. Frequencies
+
+(!) 228922952:
+- Probably a DS?
+
+(!) 229121547:
+- Probably a DS?
+
